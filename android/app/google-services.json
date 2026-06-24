@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "944674009864",
+    "project_id": "safemom-bd26b",
+    "storage_bucket": "safemom-bd26b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:944674009864:android:82bf5888e1c96c63f0b2bd",
+        "android_client_info": {
+          "package_name": "rw.alu.safemom.safemom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "944674009864-3aj56tj7t4i8a1clb1obvcp8q95ra1gv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBxe2YjI18vrbaRgw5c3_4MRnDi8AaPuO8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "944674009864-3aj56tj7t4i8a1clb1obvcp8q95ra1gv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
