@@ -1,1 +1,31 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"safemom-bd26b","appId":"1:944674009864:android:82bf5888e1c96c63f0b2bd","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"safemom-bd26b","configurations":{"android":"1:944674009864:android:82bf5888e1c96c63f0b2bd","ios":"1:944674009864:ios:55a5b195b3aefe64f0b2bd","macos":"1:944674009864:ios:55a5b195b3aefe64f0b2bd","web":"1:944674009864:web:cd63ad17c8e08549f0b2bd","windows":"1:944674009864:web:1e788d0134b70946f0b2bd"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "safemom-bd26b",
+          "appId": "1:944674009864:android:82bf5888e1c96c63f0b2bd",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "safemom-bd26b",
+          "configurations": {
+            "android": "1:944674009864:android:82bf5888e1c96c63f0b2bd",
+            "ios": "1:944674009864:ios:55a5b195b3aefe64f0b2bd",
+            "macos": "1:944674009864:ios:55a5b195b3aefe64f0b2bd",
+            "web": "1:944674009864:web:cd63ad17c8e08549f0b2bd",
+            "windows": "1:944674009864:web:1e788d0134b70946f0b2bd"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "africa-south1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

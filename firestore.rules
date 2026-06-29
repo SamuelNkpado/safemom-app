@@ -1,0 +1,113 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // SafeMom Security Rules
+    // Locks down all collections to authenticated, authorised access.
+
+    // ---------- HELPER FUNCTIONS ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isCreatingOwnRecord() {
+      return isSignedIn() && request.auth.uid == request.resource.data.user_id;
+    }
+
+    // ---------- USERS ----------
+    match /users/{userId} {
+      allow read:   if isOwner(userId);
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if false;
+    }
+
+    // ---------- CLINICS ----------
+    match /clinics/{clinicId} {
+      allow read:  if isSignedIn();
+      allow write: if false;
+    }
+
+    // ---------- SYMPTOM LOGS ----------
+    match /symptom_logs/{symptomId} {
+      allow read:   if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isCreatingOwnRecord();
+      allow update: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    // ---------- DANGER CHECKS ----------
+    match /danger_checks/{checkId} {
+      allow read:   if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isCreatingOwnRecord();
+      allow update: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // ---------- EMERGENCY REQUESTS ----------
+    match /emergency_requests/{requestId} {
+      allow read:   if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isCreatingOwnRecord();
+      allow update: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // ---------- APPOINTMENTS ----------
+    match /appointments/{appointmentId} {
+      allow read:   if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow create: if isCreatingOwnRecord();
+      allow update: if isSignedIn() && resource.data.user_id == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+    }
+
+    // ---------- COMMUNITY GROUPS ----------
+        match /community_groups/{groupId} {
+          allow read:  if isSignedIn();
+          allow write: if false;
+        }
+
+        // ---------- GROUP MEMBERSHIPS ----------
+        match /group_memberships/{membershipId} {
+          allow read:   if isSignedIn() && resource.data.user_id == request.auth.uid;
+          allow create: if isCreatingOwnRecord();
+          allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+          allow update: if false;
+        }
+
+        // ---------- POSTS ----------
+        match /posts/{postId} {
+          allow read:   if isSignedIn();
+          allow create: if isSignedIn() && request.auth.uid == request.resource.data.author_user_id;
+          allow update: if isSignedIn() && resource.data.author_user_id == request.auth.uid;
+          allow delete: if isSignedIn() && resource.data.author_user_id == request.auth.uid;
+        }
+
+        // ---------- REPLIES ----------
+        match /replies/{replyId} {
+          allow read:   if isSignedIn();
+          allow create: if isSignedIn() && request.auth.uid == request.resource.data.author_user_id;
+          allow update: if isSignedIn() && resource.data.author_user_id == request.auth.uid;
+          allow delete: if isSignedIn() && resource.data.author_user_id == request.auth.uid;
+        }
+
+        // ---------- WEEKLY TIPS ----------
+        match /weekly_tips/{tipId} {
+          allow read:  if isSignedIn();
+          allow write: if false;
+        }
+
+        // ---------- SAVED TIPS ----------
+        match /saved_tips/{savedId} {
+          allow read:   if isSignedIn() && resource.data.user_id == request.auth.uid;
+          allow create: if isCreatingOwnRecord();
+          allow delete: if isSignedIn() && resource.data.user_id == request.auth.uid;
+          allow update: if false;
+        }
+
+      }
+    }
