@@ -59,7 +59,7 @@ cd safemom-app
 2. Install dependencies
 flutter pub get
 
-3. Add Firebase configuration files (request from team lead):
+3. Add Firebase configuration files (request compulsory):
    - `android/app/google-services.json`
    - `ios/Runner/GoogleService-Info.plist`
 
@@ -69,7 +69,7 @@ flutter run
 ## Branching workflow
 
 - `main` — production-ready code, protected branch
-- `dev` — integration branch for completed features
+
 - `feature/<name>` — individual feature branches per team member
 
 All work must go through Pull Requests. PRs require at least one team review before merging.
@@ -81,4 +81,4 @@ All work must go through Pull Requests. PRs require at least one team review bef
 ## License
 
 Academic project — African Leadership University, 2026.
-Save the file, then commit:
+
