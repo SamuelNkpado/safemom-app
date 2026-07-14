@@ -24,7 +24,14 @@ import '../../features/symptoms/data/repositories/symptom_repository_impl.dart';
 import '../../features/symptoms/domain/repositories/symptom_repository.dart';
 import '../../features/symptoms/domain/usecases/log_symptom.dart';
 import '../../features/symptoms/domain/usecases/run_danger_check.dart';
-
+// Preferences
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../features/profile/data/repositories/preferences_repository_impl.dart';
+import '../../features/profile/domain/repositories/preferences_repository.dart';
+import '../../features/profile/domain/usecases/get_preferences.dart';
+import '../../features/profile/domain/usecases/mark_onboarding_complete.dart';
+import '../../features/profile/domain/usecases/update_language.dart';
+import '../../features/profile/domain/usecases/update_theme.dart';
 /// The global service locator.
 ///
 /// Use this from anywhere to fetch a dependency:
@@ -55,6 +62,9 @@ Future<void> configureDependencies() async {
         () => FirebaseFirestore.instance,
   );
   getIt.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn.instance);
+  // SharedPreferences (async — must be resolved before use)
+  final sharedPreferences = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(sharedPreferences);
 
   // ---------- AUTH FEATURE ----------
 
@@ -131,10 +141,33 @@ Future<void> configureDependencies() async {
         () => RunDangerCheck(getIt<SymptomRepository>()),
   );
 
+  // ---------- PREFERENCES FEATURE ----------
+
+  // Repository (no separate datasource — SharedPreferences is simple enough
+  // to talk to directly from the repository implementation)
+  getIt.registerLazySingleton<PreferencesRepository>(
+        () => PreferencesRepositoryImpl(getIt<SharedPreferences>()),
+  );
+
+  // Use cases
+  getIt.registerFactory<GetPreferences>(
+        () => GetPreferences(getIt<PreferencesRepository>()),
+  );
+  getIt.registerFactory<UpdateLanguage>(
+        () => UpdateLanguage(getIt<PreferencesRepository>()),
+  );
+  getIt.registerFactory<UpdateTheme>(
+        () => UpdateTheme(getIt<PreferencesRepository>()),
+  );
+  getIt.registerFactory<MarkOnboardingComplete>(
+        () => MarkOnboardingComplete(getIt<PreferencesRepository>()),
+  );
+
   // ---------- FUTURE FEATURES ----------
-  // Community, Preferences, WeeklyTips, Appointments
+  // Community, WeeklyTips, Appointments
   // will be registered here as their data layers are built.
 }
+
 
 Future<void> resetDependencies() async {
   await getIt.reset();
