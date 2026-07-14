@@ -12,6 +12,18 @@ import '../../features/auth/domain/usecases/sign_in_with_email.dart';
 import '../../features/auth/domain/usecases/sign_in_with_google.dart';
 import '../../features/auth/domain/usecases/sign_out.dart';
 import '../../features/auth/domain/usecases/sign_up_with_email.dart';
+// Emergency
+import '../../features/emergency/data/datasources/emergency_firestore_datasource.dart';
+import '../../features/emergency/data/repositories/emergency_repository_impl.dart';
+import '../../features/emergency/domain/repositories/emergency_repository.dart';
+import '../../features/emergency/domain/usecases/cancel_emergency.dart';
+import '../../features/emergency/domain/usecases/request_emergency.dart';
+// Symptoms
+import '../../features/symptoms/data/datasources/symptom_firestore_datasource.dart';
+import '../../features/symptoms/data/repositories/symptom_repository_impl.dart';
+import '../../features/symptoms/domain/repositories/symptom_repository.dart';
+import '../../features/symptoms/domain/usecases/log_symptom.dart';
+import '../../features/symptoms/domain/usecases/run_danger_check.dart';
 
 /// The global service locator.
 ///
@@ -77,22 +89,53 @@ Future<void> configureDependencies() async {
         () => ResetPassword(getIt<AuthRepository>()),
   );
 
+
+
+// ---------- EMERGENCY FEATURE ----------
+
+  // Datasource
+  getIt.registerLazySingleton<EmergencyFirestoreDatasource>(
+        () => EmergencyFirestoreDatasource(firestore: getIt<FirebaseFirestore>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<EmergencyRepository>(
+        () => EmergencyRepositoryImpl(getIt<EmergencyFirestoreDatasource>()),
+  );
+
+  // Use cases
+  getIt.registerFactory<RequestEmergency>(
+        () => RequestEmergency(getIt<EmergencyRepository>()),
+  );
+  getIt.registerFactory<CancelEmergency>(
+        () => CancelEmergency(getIt<EmergencyRepository>()),
+  );
+
+  // ---------- SYMPTOMS FEATURE ----------
+
+  // Datasource
+  getIt.registerLazySingleton<SymptomFirestoreDatasource>(
+        () => SymptomFirestoreDatasource(firestore: getIt<FirebaseFirestore>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<SymptomRepository>(
+        () => SymptomRepositoryImpl(getIt<SymptomFirestoreDatasource>()),
+  );
+
+  // Use cases
+  getIt.registerFactory<LogSymptom>(
+        () => LogSymptom(getIt<SymptomRepository>()),
+  );
+  getIt.registerFactory<RunDangerCheck>(
+        () => RunDangerCheck(getIt<SymptomRepository>()),
+  );
+
   // ---------- FUTURE FEATURES ----------
-  // As other features get their data-layer implementations built,
-  // register their datasources, repositories, and use cases here.
-  //
-  // Example structure to add later:
-  //
-  //   // Symptoms
-  //   getIt.registerLazySingleton<SymptomFirestoreDatasource>(...);
-  //   getIt.registerLazySingleton<SymptomRepository>(...);
-  //   getIt.registerFactory<LogSymptom>(...);
-  //
-  //   // Emergency, Community, Preferences, WeeklyTips, Appointments...
+  // Community, Preferences, WeeklyTips, Appointments
+  // will be registered here as their data layers are built.
 }
 
-/// Reset the container. Only used in tests to guarantee a clean slate
-/// between test cases.
 Future<void> resetDependencies() async {
   await getIt.reset();
 }
