@@ -49,6 +49,13 @@ import '../../features/home/domain/repositories/weekly_tip_repository.dart';
 import '../../features/home/domain/usecases/get_saved_tips.dart';
 import '../../features/home/domain/usecases/get_weekly_tip_for_week.dart';
 import '../../features/home/domain/usecases/save_tip.dart';
+// Appointments
+import '../../features/profile/data/datasources/appointment_firestore_datasource.dart';
+import '../../features/profile/data/repositories/appointment_repository_impl.dart';
+import '../../features/profile/domain/repositories/appointment_repository.dart';
+import '../../features/profile/domain/usecases/get_upcoming_appointments.dart';
+import '../../features/profile/domain/usecases/mark_appointment_attended.dart';
+import '../../features/profile/domain/usecases/schedule_appointment.dart';
 /// The global service locator.
 ///
 /// Use this from anywhere to fetch a dependency:
@@ -235,8 +242,32 @@ Future<void> configureDependencies() async {
         () => GetSavedTips(getIt<WeeklyTipRepository>()),
   );
 
-  // ---------- FUTURE FEATURES ----------
-  // Appointments will be registered here.
+// ---------- APPOINTMENTS FEATURE ----------
+
+  // Datasource
+  getIt.registerLazySingleton<AppointmentFirestoreDatasource>(
+        () => AppointmentFirestoreDatasource(firestore: getIt<FirebaseFirestore>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<AppointmentRepository>(
+        () => AppointmentRepositoryImpl(getIt<AppointmentFirestoreDatasource>()),
+  );
+
+  // Use cases
+  getIt.registerFactory<ScheduleAppointment>(
+        () => ScheduleAppointment(getIt<AppointmentRepository>()),
+  );
+  getIt.registerFactory<GetUpcomingAppointments>(
+        () => GetUpcomingAppointments(getIt<AppointmentRepository>()),
+  );
+  getIt.registerFactory<MarkAppointmentAttended>(
+        () => MarkAppointmentAttended(getIt<AppointmentRepository>()),
+  );
+
+  // All 7 features are now registered:
+  // Auth, Emergency, Symptoms, Preferences, Community, WeeklyTips,
+  // Appointments.
 }
 
 
