@@ -42,6 +42,13 @@ import '../../features/community/domain/usecases/get_available_groups.dart';
 import '../../features/community/domain/usecases/get_group_posts.dart';
 import '../../features/community/domain/usecases/join_group.dart';
 import '../../features/community/domain/usecases/leave_group.dart';
+// Weekly Tips
+import '../../features/home/data/datasources/weekly_tip_firestore_datasource.dart';
+import '../../features/home/data/repositories/weekly_tip_repository_impl.dart';
+import '../../features/home/domain/repositories/weekly_tip_repository.dart';
+import '../../features/home/domain/usecases/get_saved_tips.dart';
+import '../../features/home/domain/usecases/get_weekly_tip_for_week.dart';
+import '../../features/home/domain/usecases/save_tip.dart';
 /// The global service locator.
 ///
 /// Use this from anywhere to fetch a dependency:
@@ -205,10 +212,32 @@ Future<void> configureDependencies() async {
         () => CreateReply(getIt<CommunityRepository>()),
   );
 
-  // ---------- FUTURE FEATURES ----------
-  // WeeklyTips, Appointments will be registered here.
-}
+// ---------- WEEKLY TIPS FEATURE ----------
 
+  // Datasource
+  getIt.registerLazySingleton<WeeklyTipFirestoreDatasource>(
+        () => WeeklyTipFirestoreDatasource(firestore: getIt<FirebaseFirestore>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<WeeklyTipRepository>(
+        () => WeeklyTipRepositoryImpl(getIt<WeeklyTipFirestoreDatasource>()),
+  );
+
+  // Use cases
+  getIt.registerFactory<GetWeeklyTipForWeek>(
+        () => GetWeeklyTipForWeek(getIt<WeeklyTipRepository>()),
+  );
+  getIt.registerFactory<SaveTip>(
+        () => SaveTip(getIt<WeeklyTipRepository>()),
+  );
+  getIt.registerFactory<GetSavedTips>(
+        () => GetSavedTips(getIt<WeeklyTipRepository>()),
+  );
+
+  // ---------- FUTURE FEATURES ----------
+  // Appointments will be registered here.
+}
 
 
 Future<void> resetDependencies() async {
