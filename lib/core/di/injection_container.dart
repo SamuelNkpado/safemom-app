@@ -32,6 +32,16 @@ import '../../features/profile/domain/usecases/get_preferences.dart';
 import '../../features/profile/domain/usecases/mark_onboarding_complete.dart';
 import '../../features/profile/domain/usecases/update_language.dart';
 import '../../features/profile/domain/usecases/update_theme.dart';
+// Community
+import '../../features/community/data/datasources/community_firestore_datasource.dart';
+import '../../features/community/data/repositories/community_repository_impl.dart';
+import '../../features/community/domain/repositories/community_repository.dart';
+import '../../features/community/domain/usecases/create_post.dart';
+import '../../features/community/domain/usecases/create_reply.dart';
+import '../../features/community/domain/usecases/get_available_groups.dart';
+import '../../features/community/domain/usecases/get_group_posts.dart';
+import '../../features/community/domain/usecases/join_group.dart';
+import '../../features/community/domain/usecases/leave_group.dart';
 /// The global service locator.
 ///
 /// Use this from anywhere to fetch a dependency:
@@ -163,10 +173,42 @@ Future<void> configureDependencies() async {
         () => MarkOnboardingComplete(getIt<PreferencesRepository>()),
   );
 
+// ---------- COMMUNITY FEATURE ----------
+
+  // Datasource
+  getIt.registerLazySingleton<CommunityFirestoreDatasource>(
+        () => CommunityFirestoreDatasource(firestore: getIt<FirebaseFirestore>()),
+  );
+
+  // Repository
+  getIt.registerLazySingleton<CommunityRepository>(
+        () => CommunityRepositoryImpl(getIt<CommunityFirestoreDatasource>()),
+  );
+
+  // Use cases
+  getIt.registerFactory<JoinGroup>(
+        () => JoinGroup(getIt<CommunityRepository>()),
+  );
+  getIt.registerFactory<LeaveGroup>(
+        () => LeaveGroup(getIt<CommunityRepository>()),
+  );
+  getIt.registerFactory<GetAvailableGroups>(
+        () => GetAvailableGroups(getIt<CommunityRepository>()),
+  );
+  getIt.registerFactory<CreatePost>(
+        () => CreatePost(getIt<CommunityRepository>()),
+  );
+  getIt.registerFactory<GetGroupPosts>(
+        () => GetGroupPosts(getIt<CommunityRepository>()),
+  );
+  getIt.registerFactory<CreateReply>(
+        () => CreateReply(getIt<CommunityRepository>()),
+  );
+
   // ---------- FUTURE FEATURES ----------
-  // Community, WeeklyTips, Appointments
-  // will be registered here as their data layers are built.
+  // WeeklyTips, Appointments will be registered here.
 }
+
 
 
 Future<void> resetDependencies() async {
