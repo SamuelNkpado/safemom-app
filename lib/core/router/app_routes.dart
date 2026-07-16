@@ -6,15 +6,13 @@ class AppRoutes {
   // Shell / tabs
   static const String root = '/'; // MainNavShell (bottom nav host)
 
-  // Auth (owner: Kyle)
+  // Auth + onboarding wizard (owner: Kyle)
+  static const String welcome = '/welcome';
   static const String login = '/login';
-  static const String signup = '/signup';
+  static const String signup = '/signup'; // 4-step sign-up wizard
   static const String resetPassword = '/reset-password';
 
-  // Onboarding (owner: Kyle)
-  static const String onboarding = '/onboarding';
-
-  // Emergency (owner: Kyle)
+  // Emergency (owner: Brenda)
   static const String emergency = '/emergency';
 
   // Feature detail routes (owner: partner)

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/reset_password_page.dart';
+import '../../features/auth/presentation/pages/sign_up_wizard_page.dart';
+import '../../features/auth/presentation/pages/welcome_page.dart';
 import '../navigation/main_nav_shell.dart';
 import 'app_routes.dart';
 
@@ -15,10 +19,15 @@ class AppRouter {
       case AppRoutes.root:
         return _page(const MainNavShell(), settings);
 
-      // TODO(auth): replace with LoginPage / SignupPage / ResetPasswordPage.
-      // TODO(onboarding): add AppRoutes.onboarding.
-      // TODO(emergency): add AppRoutes.emergency.
-      // TODO(feature owners): register detail routes as screens are built.
+      // Auth + onboarding wizard (owner: Kyle)
+      case AppRoutes.welcome:
+        return _page(const WelcomePage(), settings);
+      case AppRoutes.login:
+        return _page(const LoginPage(), settings);
+      case AppRoutes.signup:
+        return _page(const SignUpWizardPage(), settings);
+      case AppRoutes.resetPassword:
+        return _page(const ResetPasswordPage(), settings);
 
       default:
         return _page(

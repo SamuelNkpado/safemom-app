@@ -1,9 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'core/di/auth_locator.dart';
 import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
+import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -11,22 +15,25 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const SafeMomApp());
+  runApp(SafeMomApp(authRepository: AuthLocator.buildRepository()));
 }
 
 class SafeMomApp extends StatelessWidget {
-  const SafeMomApp({super.key});
+  const SafeMomApp({super.key, required this.authRepository});
+
+  final AuthRepository authRepository;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SafeMom',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      // TODO(auth): switch initialRoute to AppRoutes.login once auth is wired,
-      // and gate MainNavShell behind an authenticated state.
-      initialRoute: AppRoutes.root,
-      onGenerateRoute: AppRouter.onGenerateRoute,
+    return BlocProvider<AuthBloc>(
+      create: (_) => AuthLocator.buildBloc(authRepository),
+      child: MaterialApp(
+        title: 'SafeMom',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        initialRoute: AppRoutes.welcome,
+        onGenerateRoute: AppRouter.onGenerateRoute,
+      ),
     );
   }
 }
