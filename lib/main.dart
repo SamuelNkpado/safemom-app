@@ -1,7 +1,15 @@
-import 'package:flutter/material.dart';
-import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'core/di/auth_locator.dart';
 import 'core/di/injection_container.dart';
+import 'core/router/app_router.dart';
+import 'core/router/app_routes.dart';
+import 'core/theme/app_theme.dart';
+import 'features/auth/domain/repositories/auth_repository.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,28 +17,24 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await configureDependencies();
-  runApp(const SafeMomApp());
+  runApp(SafeMomApp(authRepository: AuthLocator.buildRepository()));
 }
 
 class SafeMomApp extends StatelessWidget {
-  const SafeMomApp({super.key});
+  const SafeMomApp({super.key, required this.authRepository});
+
+  final AuthRepository authRepository;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'SafeMom',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2E7D7D)),
-        useMaterial3: true,
-      ),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'SafeMom — backend ready.\nPresentation layer coming soon.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16),
-          ),
-        ),
+    return BlocProvider<AuthBloc>(
+      create: (_) => AuthLocator.buildBloc(authRepository),
+      child: MaterialApp(
+        title: 'SafeMom',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        initialRoute: AppRoutes.welcome,
+        onGenerateRoute: AppRouter.onGenerateRoute,
       ),
     );
   }

@@ -1,13 +1,14 @@
-// Placeholder widget test file.
-//
-// The real tests will be added in Phase E (testing phase).
-// For now this file exists just to keep the `test/` folder valid
-// and prevent build failures.
-
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:safemom/features/auth/presentation/pages/welcome_page.dart';
 
 void main() {
-  test('placeholder test — always passes', () {
-    expect(true, isTrue);
+  testWidgets('WelcomePage shows greeting and CTA', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: WelcomePage()));
+
+    expect(find.text('Karibu, Mama'), findsOneWidget);
+    expect(find.text('Get Started'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('Kiswahili'), findsOneWidget);
   });
 }
