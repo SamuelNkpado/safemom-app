@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/di/auth_locator.dart';
+import 'core/di/injection_container.dart';
 import 'core/router/app_router.dart';
 import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
@@ -15,6 +16,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await configureDependencies();
   runApp(SafeMomApp(authRepository: AuthLocator.buildRepository()));
 }
 
