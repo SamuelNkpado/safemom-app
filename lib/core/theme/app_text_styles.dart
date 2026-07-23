@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../constants/app_colors.dart';
 
+/// SafeMom type scale, Inter font. See DESIGN_SYSTEM.md.
+///
+/// Hard rule: never use the default Flutter font. Wrap text in
+/// GoogleFonts.inter(...) or apply one of these styles.
 class AppTextStyles {
+  AppTextStyles._();
+
   static TextStyle h1 = GoogleFonts.inter(
     fontSize: 28,
     fontWeight: FontWeight.w700,

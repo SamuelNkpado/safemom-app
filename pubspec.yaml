@@ -41,6 +41,8 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_bloc: ^9.1.1
   equatable: ^2.0.8
+  google_fonts: ^6.2.1
+  lucide_icons: ^0.257.0
   get_it: ^9.2.1
 
 dev_dependencies:
@@ -96,4 +98,3 @@ flutter:
   #         weight: 700
   #
   # For details regarding fonts from package dependencies,
-  # see https://flutter.dev/to/font-from-package
