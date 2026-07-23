@@ -1,7 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 
+import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/reset_password.dart';
 import '../../domain/usecases/sign_in_with_email.dart';
@@ -11,12 +13,11 @@ import '../../domain/usecases/sign_up_with_email.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
-/// Coordinates authentication for the whole app.
+/// Coordinates all auth flows on top of Kyle's use cases and repository.
 ///
-/// It only ever calls use cases — never Firebase directly. The use cases
-/// validate input (throwing [ArgumentError]) and the data layer throws
-/// [AuthException] for provider failures, so both are caught and surfaced
-/// as friendly messages in [AuthState.errorMessage].
+/// The repository owns the auth-state stream; every other action is a
+/// use case call. The bloc turns those async calls into UI-friendly
+/// states (idle, submitting, success, failure).
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required AuthRepository authRepository,
@@ -25,7 +26,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required SignInWithGoogle signInWithGoogle,
     required ResetPassword resetPassword,
     required SignOut signOut,
-  })  : _signInWithEmail = signInWithEmail,
+  })  : _authRepository = authRepository,
+        _signInWithEmail = signInWithEmail,
         _signUpWithEmail = signUpWithEmail,
         _signInWithGoogle = signInWithGoogle,
         _resetPassword = resetPassword,
@@ -39,51 +41,69 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignOutRequested>(_onSignOutRequested);
     on<AuthFormReset>(_onFormReset);
 
-    // Mirror the provider's auth state into the bloc.
-    _userSub = authRepository.authStateChanges.listen(
-      (user) => add(AuthUserChanged(user)),
+    _authSub = _authRepository.authStateChanges.listen(
+          (user) => add(AuthUserChanged(user)),
     );
   }
 
+  final AuthRepository _authRepository;
   final SignInWithEmail _signInWithEmail;
   final SignUpWithEmail _signUpWithEmail;
   final SignInWithGoogle _signInWithGoogle;
   final ResetPassword _resetPassword;
   final SignOut _signOut;
 
-  late final StreamSubscription<dynamic> _userSub;
+  StreamSubscription<User?>? _authSub;
 
-  void _onUserChanged(AuthUserChanged event, Emitter<AuthState> emit) {
-    emit(
-      state.copyWith(
-        status: event.user != null
-            ? AuthStatus.authenticated
-            : AuthStatus.unauthenticated,
-        user: event.user,
-      ),
-    );
+  Future<void> _onUserChanged(
+      AuthUserChanged event,
+      Emitter<AuthState> emit,
+      ) async {
+    if (event.user == null) {
+      emit(state.copyWith(
+        status: AuthStatus.unauthenticated,
+        user: null,
+      ));
+      return;
+    }
+    emit(state.copyWith(
+      status: AuthStatus.authenticated,
+      user: event.user,
+    ));
   }
 
   Future<void> _onSignInRequested(
-    AuthSignInRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(state.copyWith(formStatus: AuthFormStatus.submitting, errorMessage: null));
+      AuthSignInRequested event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(state.copyWith(
+      formStatus: AuthFormStatus.submitting,
+      errorMessage: null,
+      infoMessage: null,
+    ));
     try {
-      await _signInWithEmail(email: event.email, password: event.password);
+      await _signInWithEmail(
+        email: event.email,
+        password: event.password,
+      );
       emit(state.copyWith(formStatus: AuthFormStatus.success));
-    } on ArgumentError catch (e) {
-      emit(_fail(e.message.toString()));
-    } on AuthException catch (e) {
-      emit(_fail(e.message));
+    } on AuthException catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message,
+      ));
     }
   }
 
   Future<void> _onSignUpSubmitted(
-    AuthSignUpSubmitted event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(state.copyWith(formStatus: AuthFormStatus.submitting, errorMessage: null));
+      AuthSignUpSubmitted event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(state.copyWith(
+      formStatus: AuthFormStatus.submitting,
+      errorMessage: null,
+      infoMessage: null,
+    ));
     try {
       await _signUpWithEmail(
         name: event.name,
@@ -93,71 +113,98 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         dueDate: event.dueDate,
       );
       emit(state.copyWith(formStatus: AuthFormStatus.success));
-    } on ArgumentError catch (e) {
-      emit(_fail(e.message.toString()));
-    } on AuthException catch (e) {
-      emit(_fail(e.message));
+    } on AuthException catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message,
+      ));
     }
   }
 
   Future<void> _onGoogleSignInRequested(
-    AuthGoogleSignInRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(state.copyWith(formStatus: AuthFormStatus.submitting, errorMessage: null));
+      AuthGoogleSignInRequested event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(state.copyWith(
+      formStatus: AuthFormStatus.submitting,
+      errorMessage: null,
+      infoMessage: null,
+    ));
     try {
       await _signInWithGoogle();
       emit(state.copyWith(formStatus: AuthFormStatus.success));
-    } on AuthException catch (e) {
-      emit(_fail(e.message));
+    } on AuthException catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message,
+      ));
     }
   }
 
   Future<void> _onPasswordResetRequested(
-    AuthPasswordResetRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(state.copyWith(formStatus: AuthFormStatus.submitting, errorMessage: null));
+      AuthPasswordResetRequested event,
+      Emitter<AuthState> emit,
+      ) async {
+    emit(state.copyWith(
+      formStatus: AuthFormStatus.submitting,
+      errorMessage: null,
+      infoMessage: null,
+    ));
     try {
       await _resetPassword(email: event.email);
-      emit(
-        state.copyWith(
-          formStatus: AuthFormStatus.success,
-          infoMessage: 'A reset link is on its way. Check your email.',
-        ),
-      );
-    } on ArgumentError catch (e) {
-      emit(_fail(e.message.toString()));
-    } on AuthException catch (e) {
-      emit(_fail(e.message));
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.success,
+        infoMessage:
+        'Reset link sent. Please check your inbox.',
+      ));
+    } on AuthException catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message,
+      ));
     }
   }
 
   Future<void> _onSignOutRequested(
-    AuthSignOutRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    await _signOut();
-  }
-
-  void _onFormReset(AuthFormReset event, Emitter<AuthState> emit) {
-    emit(
-      state.copyWith(
+      AuthSignOutRequested event,
+      Emitter<AuthState> emit,
+      ) async {
+    debugPrint('AUTHBLOC: sign-out handler entered');
+    try {
+      debugPrint('AUTHBLOC: calling _signOut()...');
+      await _signOut();
+      debugPrint('AUTHBLOC: _signOut() completed, emitting unauthenticated');
+      emit(state.copyWith(
+        status: AuthStatus.unauthenticated,
+        user: null,
         formStatus: AuthFormStatus.idle,
         errorMessage: null,
         infoMessage: null,
-      ),
-    );
+      ));
+      debugPrint('AUTHBLOC: state emitted successfully');
+    } on AuthException catch (error) {
+      debugPrint('AUTHBLOC: AuthException caught: ${error.message}');
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message,
+      ));
+    } catch (e, stack) {
+      debugPrint('AUTHBLOC: UNEXPECTED ERROR: $e');
+      debugPrint('AUTHBLOC: stack: $stack');
+    }
   }
 
-  AuthState _fail(String message) => state.copyWith(
-        formStatus: AuthFormStatus.failure,
-        errorMessage: message,
-      );
+  void _onFormReset(AuthFormReset event, Emitter<AuthState> emit) {
+    emit(state.copyWith(
+      formStatus: AuthFormStatus.idle,
+      errorMessage: null,
+      infoMessage: null,
+    ));
+  }
 
   @override
   Future<void> close() {
-    _userSub.cancel();
+    _authSub?.cancel();
     return super.close();
   }
 }
