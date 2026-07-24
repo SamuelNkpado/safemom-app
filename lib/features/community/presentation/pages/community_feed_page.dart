@@ -65,24 +65,24 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
       ),
       bottomNavigationBar: _section == _FeedSection.posts
           ? SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  AppSpacing.sm,
-                  AppSpacing.md,
-                  AppSpacing.sm,
-                ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: PrimaryButton(
-                    label: 'Create post',
-                    onPressed: () =>
-                        Navigator.pushNamed(context, AppRoutes.createPost),
-                  ),
-                ),
-              ),
-            )
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            AppSpacing.sm,
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            child: PrimaryButton(
+              label: 'Create post',
+              onPressed: () =>
+                  Navigator.pushNamed(context, AppRoutes.createPost),
+            ),
+          ),
+        ),
+      )
           : null,
     );
   }
@@ -90,22 +90,121 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
   Widget _buildSectionBody(BuildContext context) {
     switch (_section) {
       case _FeedSection.photos:
-        return const CommunityStatusView(
-          icon: Icons.photo_library_outlined,
-          title: 'Photos',
-          message: 'Photo sharing is coming soon.',
+        return BlocBuilder<CommunityBloc, CommunityState>(
+          builder: (context, state) {
+            final postsWithPhotos = state.posts
+                .where((p) => p.photoUrl != null && p.photoUrl!.isNotEmpty)
+                .toList();
+
+            if (state.feedStatus == FeedStatus.loading ||
+                state.feedStatus == FeedStatus.initial) {
+              return const Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: FeedShimmerList(),
+              );
+            }
+
+            if (postsWithPhotos.isEmpty) {
+              return const CommunityStatusView(
+                icon: Icons.photo_library_outlined,
+                title: 'No photos yet',
+                message:
+                'Photos shared with posts will appear here once someone in the group adds one.',
+              );
+            }
+
+            return GridView.builder(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              gridDelegate:
+              const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: AppSpacing.xs,
+                mainAxisSpacing: AppSpacing.xs,
+              ),
+              itemCount: postsWithPhotos.length,
+              itemBuilder: (context, index) {
+                final post = postsWithPhotos[index];
+                return GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    AppRoutes.communityPost,
+                    arguments: post,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: Image.network(
+                      post.photoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.cardSurface,
+                        child: const Icon(
+                          Icons.broken_image_outlined,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
         );
+
       case _FeedSection.about:
         return BlocBuilder<CommunityBloc, CommunityState>(
-          builder: (context, state) => Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(
-              state.group?.description ??
-                  'A space to share questions, wins, and support.',
-              style: AppTextStyles.body,
-            ),
-          ),
+          builder: (context, state) {
+            final group = state.group;
+            if (group == null) {
+              return const Padding(
+                padding: EdgeInsets.all(AppSpacing.md),
+                child: Text(
+                  'Group information is not available yet.',
+                ),
+              );
+            }
+
+            final formattedCreatedAt =
+                '${group.createdAt.day}/${group.createdAt.month}/${group.createdAt.year}';
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('About', style: AppTextStyles.h2),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(group.description, style: AppTextStyles.body),
+                  const SizedBox(height: AppSpacing.lg),
+                  _AboutRow(
+                    icon: Icons.groups_outlined,
+                    label: 'Members',
+                    value: '${group.memberCount}',
+                  ),
+                  _AboutRow(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Created',
+                    value: formattedCreatedAt,
+                  ),
+                  if (group.locationFilter != null &&
+                      group.locationFilter!.isNotEmpty)
+                    _AboutRow(
+                      icon: Icons.place_outlined,
+                      label: 'Location',
+                      value: group.locationFilter!,
+                    ),
+                  _AboutRow(
+                    icon: group.isPrivate
+                        ? Icons.lock_outline
+                        : Icons.public_outlined,
+                    label: 'Visibility',
+                    value: group.isPrivate ? 'Private' : 'Open to all',
+                  ),
+                ],
+              ),
+            );
+          },
         );
+
       case _FeedSection.posts:
         return BlocBuilder<CommunityBloc, CommunityState>(
           builder: (context, state) {
@@ -139,7 +238,7 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
                     icon: Icons.forum_outlined,
                     title: 'No posts yet',
                     message:
-                        'Be the first mama to share something with the group.',
+                    'Be the first mama to share something with the group.',
                   );
                 }
                 final currentUserId = context
@@ -154,7 +253,7 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
                     padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: state.posts.length,
                     separatorBuilder: (_, _) =>
-                        const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (context, index) {
                       final post = state.posts[index];
                       return PostCard(
@@ -173,6 +272,37 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
           },
         );
     }
+  }
+}
+
+class _AboutRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const _AboutRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: AppColors.textSecondary),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            '$label: ',
+            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+          ),
+          Expanded(child: Text(value, style: AppTextStyles.body)),
+        ],
+      ),
+    );
   }
 }
 

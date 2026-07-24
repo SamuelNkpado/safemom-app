@@ -213,11 +213,19 @@ class FirebaseAuthDatasource {
   // ---------- SIGN OUT ----------
 
   Future<void> signOut() async {
-    // Sign out of Google if we're signed in there
+    // Try to sign out of Google, but don't let it block Firebase sign-out.
+    // On web, if the user authenticated via email, Google sign-out can
+    // hang indefinitely waiting for a session that doesn't exist.
     try {
-      await _googleSignIn.signOut();
+      await _googleSignIn.signOut().timeout(
+        const Duration(seconds: 2),
+        onTimeout: () {
+          // Silently proceed — Firebase sign-out is what actually matters.
+          return;
+        },
+      );
     } catch (_) {
-      // Non-fatal
+      // Non-fatal — user might not have signed in with Google anyway.
     }
     await _firebaseAuth.signOut();
   }

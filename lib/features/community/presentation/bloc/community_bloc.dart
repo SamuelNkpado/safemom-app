@@ -116,6 +116,7 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
         groupId: group.groupId,
         authorUserId: event.authorUserId,
         body: event.body,
+        photoUrl: event.photoUrl,
         isAnonymous: event.isAnonymous,
         pregnancyWeekAtPost: event.pregnancyWeek,
       );

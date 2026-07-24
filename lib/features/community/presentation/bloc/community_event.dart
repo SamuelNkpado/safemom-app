@@ -25,14 +25,19 @@ class PostSubmitted extends CommunityEvent {
   final String body;
   final bool isAnonymous;
   final int pregnancyWeek;
+  final String? photoUrl;
+
   const PostSubmitted({
     required this.authorUserId,
     required this.body,
     required this.isAnonymous,
     required this.pregnancyWeek,
+    this.photoUrl,
   });
+
   @override
-  List<Object?> get props => [authorUserId, body, isAnonymous, pregnancyWeek];
+  List<Object?> get props =>
+      [authorUserId, body, isAnonymous, pregnancyWeek, photoUrl];
 }
 
 class ReplySubmitted extends CommunityEvent {
