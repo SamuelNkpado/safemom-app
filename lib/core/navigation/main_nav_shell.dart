@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-
-import '../../features/community/presentation/pages/community_page.dart';
+import '../../features/community/presentation/pages/community_feed_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/symptoms/presentation/pages/symptoms_page.dart';
@@ -25,7 +24,7 @@ class _MainNavShellState extends State<MainNavShell> {
   static const List<Widget> _tabs = [
     HomePage(),
     SymptomsPage(),
-    CommunityPage(),
+    CommunityFeedPage(),
     ProfilePage(),
   ];
 

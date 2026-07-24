@@ -4,10 +4,8 @@ import 'package:safemom/core/constants/app_colors.dart';
 import 'package:safemom/core/constants/app_spacing.dart';
 import 'package:safemom/core/router/app_routes.dart';
 import 'package:safemom/core/theme/app_text_styles.dart';
-import 'package:safemom/core/widgets/safemom_bottom_nav.dart';
 import 'package:safemom/core/widgets/widgets.dart';
 import 'package:safemom/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:safemom/features/emergency/presentation/emergency_actions.dart';
 
 import '../bloc/community_bloc.dart';
 import '../bloc/community_event.dart';
@@ -18,6 +16,9 @@ import '../widgets/post_card.dart';
 
 enum _FeedSection { posts, photos, about }
 
+/// Screen 10 — Community Feed.
+/// Assumes CommunityBloc and AuthBloc are both already provided above this
+/// widget in the tree (see main.dart wiring notes).
 class CommunityFeedPage extends StatefulWidget {
   const CommunityFeedPage({super.key});
 
@@ -56,27 +57,21 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
           ],
         ),
       ),
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_section == _FeedSection.posts)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
-              child: SizedBox(
-                width: double.infinity,
-                child: PrimaryButton(
-                  label: 'Create post',
-                  onPressed: () => Navigator.pushNamed(context, AppRoutes.createPost),
+      bottomNavigationBar: _section == _FeedSection.posts
+          ? SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: PrimaryButton(
+                    label: 'Create post',
+                    onPressed: () => Navigator.pushNamed(context, AppRoutes.createPost),
+                  ),
                 ),
               ),
-            ),
-          SafeMomBottomNav(
-            currentIndex: 2,
-            onTabSelected: (_) {},
-            onSosPressed: () => launchEmergencySos(context),
-          ),
-        ],
-      ),
+            )
+          : null,
     );
   }
 
@@ -93,7 +88,8 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
           builder: (context, state) => Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Text(
-              state.group?.description ?? 'A space to share questions, wins, and support.',
+              state.group?.description ??
+                  'A space to share questions, wins, and support.',
               style: AppTextStyles.body,
             ),
           ),
