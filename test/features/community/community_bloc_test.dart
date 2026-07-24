@@ -62,38 +62,50 @@ void main() {
     blocTest<CommunityBloc, CommunityState>(
       'emits group then feed success when both fetches succeed',
       build: () {
-        when(() => repository.getAvailableGroups(
-              pregnancyWeek: any(named: 'pregnancyWeek'),
-              locationHint: any(named: 'locationHint'),
-            )).thenAnswer((_) async => [testGroup]);
-        when(() => repository.getGroupPosts(
-              groupId: any(named: 'groupId'),
-              limit: any(named: 'limit'),
-              before: any(named: 'before'),
-            )).thenAnswer((_) async => [post]);
+        when(
+          () => repository.getAvailableGroups(
+            pregnancyWeek: any(named: 'pregnancyWeek'),
+            locationHint: any(named: 'locationHint'),
+          ),
+        ).thenAnswer((_) async => [testGroup]);
+        when(
+          () => repository.getGroupPosts(
+            groupId: any(named: 'groupId'),
+            limit: any(named: 'limit'),
+            before: any(named: 'before'),
+          ),
+        ).thenAnswer((_) async => [post]);
         return bloc;
       },
       act: (bloc) => bloc.add(const FeedRequested(22)),
       expect: () => [
         predicate<CommunityState>((s) => s.groupStatus == GroupStatus.loading),
-        predicate<CommunityState>((s) => s.groupStatus == GroupStatus.success && s.group == testGroup),
-        predicate<CommunityState>((s) => s.feedStatus == FeedStatus.success && s.posts.length == 1),
+        predicate<CommunityState>(
+          (s) => s.groupStatus == GroupStatus.success && s.group == testGroup,
+        ),
+        predicate<CommunityState>(
+          (s) => s.feedStatus == FeedStatus.success && s.posts.length == 1,
+        ),
       ],
     );
 
     blocTest<CommunityBloc, CommunityState>(
       'emits an error state when no groups are available',
       build: () {
-        when(() => repository.getAvailableGroups(
-              pregnancyWeek: any(named: 'pregnancyWeek'),
-              locationHint: any(named: 'locationHint'),
-            )).thenAnswer((_) async => []);
+        when(
+          () => repository.getAvailableGroups(
+            pregnancyWeek: any(named: 'pregnancyWeek'),
+            locationHint: any(named: 'locationHint'),
+          ),
+        ).thenAnswer((_) async => []);
         return bloc;
       },
       act: (bloc) => bloc.add(const FeedRequested(22)),
       expect: () => [
         predicate<CommunityState>((s) => s.groupStatus == GroupStatus.loading),
-        predicate<CommunityState>((s) => s.groupStatus == GroupStatus.error && s.groupError != null),
+        predicate<CommunityState>(
+          (s) => s.groupStatus == GroupStatus.error && s.groupError != null,
+        ),
       ],
     );
   });
@@ -102,42 +114,57 @@ void main() {
     blocTest<CommunityBloc, CommunityState>(
       'prepends the new post to the feed on success',
       build: () {
-        when(() => repository.createPost(
-              groupId: any(named: 'groupId'),
-              authorUserId: any(named: 'authorUserId'),
-              body: any(named: 'body'),
-              photoUrl: any(named: 'photoUrl'),
-              isAnonymous: any(named: 'isAnonymous'),
-              pregnancyWeekAtPost: any(named: 'pregnancyWeekAtPost'),
-            )).thenAnswer((_) async => post);
+        when(
+          () => repository.createPost(
+            groupId: any(named: 'groupId'),
+            authorUserId: any(named: 'authorUserId'),
+            body: any(named: 'body'),
+            photoUrl: any(named: 'photoUrl'),
+            isAnonymous: any(named: 'isAnonymous'),
+            pregnancyWeekAtPost: any(named: 'pregnancyWeekAtPost'),
+          ),
+        ).thenAnswer((_) async => post);
         return bloc;
       },
-      seed: () => CommunityState(groupStatus: GroupStatus.success, group: testGroup),
-      act: (bloc) => bloc.add(const PostSubmitted(
-        authorUserId: 'u1',
-        body: 'Hello mamas',
-        isAnonymous: false,
-        pregnancyWeek: 22,
-      )),
+      seed: () =>
+          CommunityState(groupStatus: GroupStatus.success, group: testGroup),
+      act: (bloc) => bloc.add(
+        const PostSubmitted(
+          authorUserId: 'u1',
+          body: 'Hello mamas',
+          isAnonymous: false,
+          pregnancyWeek: 22,
+        ),
+      ),
       expect: () => [
-        predicate<CommunityState>((s) => s.composerStatus == ComposerStatus.submitting),
         predicate<CommunityState>(
-            (s) => s.composerStatus == ComposerStatus.success && s.posts.contains(post)),
+          (s) => s.composerStatus == ComposerStatus.submitting,
+        ),
+        predicate<CommunityState>(
+          (s) =>
+              s.composerStatus == ComposerStatus.success &&
+              s.posts.contains(post),
+        ),
       ],
     );
 
     blocTest<CommunityBloc, CommunityState>(
       'errors immediately if no group is loaded yet',
       build: () => bloc,
-      act: (bloc) => bloc.add(const PostSubmitted(
-        authorUserId: 'u1',
-        body: 'Hello mamas',
-        isAnonymous: false,
-        pregnancyWeek: 22,
-      )),
+      act: (bloc) => bloc.add(
+        const PostSubmitted(
+          authorUserId: 'u1',
+          body: 'Hello mamas',
+          isAnonymous: false,
+          pregnancyWeek: 22,
+        ),
+      ),
       expect: () => [
         predicate<CommunityState>(
-            (s) => s.composerStatus == ComposerStatus.error && s.composerError != null),
+          (s) =>
+              s.composerStatus == ComposerStatus.error &&
+              s.composerError != null,
+        ),
       ],
     );
   });
@@ -146,30 +173,41 @@ void main() {
     blocTest<CommunityBloc, CommunityState>(
       'stores the new reply locally for that post on success',
       build: () {
-        when(() => repository.createReply(
-              postId: any(named: 'postId'),
-              authorUserId: any(named: 'authorUserId'),
-              body: any(named: 'body'),
-              isAnonymous: any(named: 'isAnonymous'),
-            )).thenAnswer((_) async => Reply(
-              replyId: 'r1',
-              postId: 'p1',
-              authorUserId: 'u1',
-              body: 'So relatable!',
-              createdAt: DateTime(2026, 1, 1),
-            ));
+        when(
+          () => repository.createReply(
+            postId: any(named: 'postId'),
+            authorUserId: any(named: 'authorUserId'),
+            body: any(named: 'body'),
+            isAnonymous: any(named: 'isAnonymous'),
+          ),
+        ).thenAnswer(
+          (_) async => Reply(
+            replyId: 'r1',
+            postId: 'p1',
+            authorUserId: 'u1',
+            body: 'So relatable!',
+            createdAt: DateTime(2026, 1, 1),
+          ),
+        );
         return bloc;
       },
-      act: (bloc) => bloc.add(const ReplySubmitted(
-        postId: 'p1',
-        authorUserId: 'u1',
-        body: 'So relatable!',
-        isAnonymous: false,
-      )),
+      act: (bloc) => bloc.add(
+        const ReplySubmitted(
+          postId: 'p1',
+          authorUserId: 'u1',
+          body: 'So relatable!',
+          isAnonymous: false,
+        ),
+      ),
       expect: () => [
-        predicate<CommunityState>((s) => s.replyStatus == ComposerStatus.submitting),
         predicate<CommunityState>(
-            (s) => s.replyStatus == ComposerStatus.success && s.repliesFor('p1').length == 1),
+          (s) => s.replyStatus == ComposerStatus.submitting,
+        ),
+        predicate<CommunityState>(
+          (s) =>
+              s.replyStatus == ComposerStatus.success &&
+              s.repliesFor('p1').length == 1,
+        ),
       ],
     );
   });

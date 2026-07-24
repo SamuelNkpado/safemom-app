@@ -18,12 +18,18 @@ Future<void> launchEmergencySos(BuildContext context) async {
         style: AppTextStyles.body,
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
         TextButton(
           onPressed: () => Navigator.pop(context, true),
           child: Text(
             'Send Alert',
-            style: TextStyle(color: AppColors.emergencyRed, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.emergencyRed,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
@@ -36,7 +42,11 @@ Future<void> launchEmergencySos(BuildContext context) async {
 
   if (user.selectedClinicId == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Add a clinic in your profile before requesting emergency help.')),
+      const SnackBar(
+        content: Text(
+          'Add a clinic in your profile before requesting emergency help.',
+        ),
+      ),
     );
     return;
   }
@@ -44,7 +54,8 @@ Future<void> launchEmergencySos(BuildContext context) async {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+    builder: (_) =>
+        const Center(child: CircularProgressIndicator(color: Colors.white)),
   );
 
   final position = await _getCurrentPosition();
@@ -54,7 +65,9 @@ Future<void> launchEmergencySos(BuildContext context) async {
   if (position == null) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Turn on location access to send an SOS alert.')),
+        const SnackBar(
+          content: Text('Turn on location access to send an SOS alert.'),
+        ),
       );
     }
     return;

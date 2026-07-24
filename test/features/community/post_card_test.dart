@@ -4,8 +4,9 @@ import 'package:safemom/features/community/domain/entities/post.dart';
 import 'package:safemom/features/community/presentation/widgets/post_card.dart';
 
 void main() {
-  testWidgets('PostCard shows anonymous label, week, body, likes and replies',
-      (tester) async {
+  testWidgets('PostCard shows anonymous label, week, body, likes and replies', (
+    tester,
+  ) async {
     final post = Post(
       postId: 'p1',
       groupId: 'g1',
@@ -21,7 +22,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: PostCard(post: post, isOwnPost: false, onTap: () {})),
+        home: Scaffold(
+          body: PostCard(post: post, isOwnPost: false, onTap: () {}),
+        ),
       ),
     );
 
@@ -31,7 +34,9 @@ void main() {
     expect(find.text('2 replies'), findsOneWidget);
   });
 
-  testWidgets('shows "You" for the current user\'s own non-anonymous post', (tester) async {
+  testWidgets('shows "You" for the current user\'s own non-anonymous post', (
+    tester,
+  ) async {
     final post = Post(
       postId: 'p2',
       groupId: 'g1',
@@ -46,7 +51,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Scaffold(body: PostCard(post: post, isOwnPost: true, onTap: () {})),
+        home: Scaffold(
+          body: PostCard(post: post, isOwnPost: true, onTap: () {}),
+        ),
       ),
     );
 

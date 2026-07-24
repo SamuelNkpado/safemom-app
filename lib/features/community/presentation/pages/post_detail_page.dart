@@ -42,7 +42,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
         title: Text('Post', style: AppTextStyles.h2),
       ),
       body: BlocConsumer<CommunityBloc, CommunityState>(
-        listenWhen: (previous, current) => previous.replyStatus != current.replyStatus,
+        listenWhen: (previous, current) =>
+            previous.replyStatus != current.replyStatus,
         listener: (context, state) {
           if (state.replyStatus == ComposerStatus.success) {
             _replyController.clear();
@@ -70,12 +71,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     const SizedBox(height: AppSpacing.lg),
                     Text(
                       'Replies (${widget.post.repliesCount + localReplies.length})',
-                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTextStyles.body.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     if (widget.post.repliesCount == 0 && localReplies.isEmpty)
                       Padding(
-                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.md,
+                        ),
                         child: Text(
                           'No replies yet. Be the first to respond.',
                           style: AppTextStyles.caption,
@@ -91,7 +96,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         ),
                       ),
                     for (final reply in localReplies)
-                      ReplyTile(reply: reply, isOwnReply: reply.authorUserId == currentUserId),
+                      ReplyTile(
+                        reply: reply,
+                        isOwnReply: reply.authorUserId == currentUserId,
+                      ),
                   ],
                 ),
               ),
@@ -99,20 +107,31 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 top: false,
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    border: Border(top: BorderSide(color: Colors.grey.shade300)),
+                    border: Border(
+                      top: BorderSide(color: Colors.grey.shade300),
+                    ),
                   ),
                   child: Row(
                     children: [
                       IconButton(
                         icon: Icon(
-                          _replyAnonymous ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                          _replyAnonymous
+                              ? Icons.visibility_off_rounded
+                              : Icons.visibility_rounded,
                           color: _replyAnonymous ? Colors.grey : AppColors.teal,
                         ),
-                        tooltip: _replyAnonymous ? 'Replying anonymously' : 'Replying with your name',
-                        onPressed: () => setState(() => _replyAnonymous = !_replyAnonymous),
+                        tooltip: _replyAnonymous
+                            ? 'Replying anonymously'
+                            : 'Replying with your name',
+                        onPressed: () =>
+                            setState(() => _replyAnonymous = !_replyAnonymous),
                       ),
                       Expanded(
                         child: TextField(
@@ -130,23 +149,31 @@ class _PostDetailPageState extends State<PostDetailPage> {
                               child: SizedBox(
                                 width: 20,
                                 height: 20,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             )
                           : IconButton(
-                              icon: const Icon(Icons.send_rounded, color: AppColors.teal),
+                              icon: const Icon(
+                                Icons.send_rounded,
+                                color: AppColors.teal,
+                              ),
                               onPressed: () {
                                 final text = _replyController.text.trim();
-                                final user = context.read<AuthBloc>().state.user;
+                                final user = context
+                                    .read<AuthBloc>()
+                                    .state
+                                    .user;
                                 if (text.isEmpty || user == null) return;
                                 context.read<CommunityBloc>().add(
-                                      ReplySubmitted(
-                                        postId: widget.post.postId,
-                                        authorUserId: user.userId,
-                                        body: text,
-                                        isAnonymous: _replyAnonymous,
-                                      ),
-                                    );
+                                  ReplySubmitted(
+                                    postId: widget.post.postId,
+                                    authorUserId: user.userId,
+                                    body: text,
+                                    isAnonymous: _replyAnonymous,
+                                  ),
+                                );
                               },
                             ),
                     ],

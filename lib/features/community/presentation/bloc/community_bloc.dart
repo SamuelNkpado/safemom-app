@@ -27,7 +27,9 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
     on<DefaultAnonymousToggled>(_onDefaultAnonymousToggled);
     on<PostSubmitted>(_onPostSubmitted);
     on<ReplySubmitted>(_onReplySubmitted);
-    on<_PreferencesLoaded>((event, emit) => emit(state.copyWith(defaultAnonymous: event.value)));
+    on<_PreferencesLoaded>(
+      (event, emit) => emit(state.copyWith(defaultAnonymous: event.value)),
+    );
     _loadPreferences();
   }
 
@@ -37,16 +39,28 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
     if (!isClosed) add(_PreferencesLoaded(savedAnonymous));
   }
 
-  Future<void> _onFeedRequested(FeedRequested event, Emitter<CommunityState> emit) async {
-    emit(state.copyWith(groupStatus: GroupStatus.loading, feedStatus: FeedStatus.loading));
+  Future<void> _onFeedRequested(
+    FeedRequested event,
+    Emitter<CommunityState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        groupStatus: GroupStatus.loading,
+        feedStatus: FeedStatus.loading,
+      ),
+    );
     try {
-      final groups = await getAvailableGroups(pregnancyWeek: event.pregnancyWeek);
+      final groups = await getAvailableGroups(
+        pregnancyWeek: event.pregnancyWeek,
+      );
       if (groups.isEmpty) {
-        emit(state.copyWith(
-          groupStatus: GroupStatus.error,
-          groupError: 'No community groups are set up yet.',
-          feedStatus: FeedStatus.error,
-        ));
+        emit(
+          state.copyWith(
+            groupStatus: GroupStatus.error,
+            groupError: 'No community groups are set up yet.',
+            feedStatus: FeedStatus.error,
+          ),
+        );
         return;
       }
       final group = groups.first;
@@ -55,33 +69,45 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
       final posts = await getGroupPosts(groupId: group.groupId);
       emit(state.copyWith(feedStatus: FeedStatus.success, posts: posts));
     } on ArgumentError catch (e) {
-      emit(state.copyWith(
-        groupStatus: GroupStatus.error,
-        groupError: e.message.toString(),
-        feedStatus: FeedStatus.error,
-      ));
+      emit(
+        state.copyWith(
+          groupStatus: GroupStatus.error,
+          groupError: e.message.toString(),
+          feedStatus: FeedStatus.error,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(
-        groupStatus: GroupStatus.error,
-        groupError: 'Could not load the community feed.',
-        feedStatus: FeedStatus.error,
-      ));
+      emit(
+        state.copyWith(
+          groupStatus: GroupStatus.error,
+          groupError: 'Could not load the community feed.',
+          feedStatus: FeedStatus.error,
+        ),
+      );
     }
   }
 
-  Future<void> _onDefaultAnonymousToggled(DefaultAnonymousToggled event, Emitter<CommunityState> emit) async {
+  Future<void> _onDefaultAnonymousToggled(
+    DefaultAnonymousToggled event,
+    Emitter<CommunityState> emit,
+  ) async {
     emit(state.copyWith(defaultAnonymous: event.value));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kDefaultAnonymousPrefKey, event.value);
   }
 
-  Future<void> _onPostSubmitted(PostSubmitted event, Emitter<CommunityState> emit) async {
+  Future<void> _onPostSubmitted(
+    PostSubmitted event,
+    Emitter<CommunityState> emit,
+  ) async {
     final group = state.group;
     if (group == null) {
-      emit(state.copyWith(
-        composerStatus: ComposerStatus.error,
-        composerError: 'No group loaded yet — go back and reopen the feed.',
-      ));
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.error,
+          composerError: 'No group loaded yet — go back and reopen the feed.',
+        ),
+      );
       return;
     }
     emit(state.copyWith(composerStatus: ComposerStatus.submitting));
@@ -93,23 +119,38 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
         isAnonymous: event.isAnonymous,
         pregnancyWeekAtPost: event.pregnancyWeek,
       );
-      final updatedPosts = post.isPublished ? [post, ...state.posts] : state.posts;
-      emit(state.copyWith(
-        composerStatus: ComposerStatus.success,
-        lastSubmittedPost: post,
-        posts: updatedPosts,
-      ));
+      final updatedPosts = post.isPublished
+          ? [post, ...state.posts]
+          : state.posts;
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.success,
+          lastSubmittedPost: post,
+          posts: updatedPosts,
+        ),
+      );
     } on ArgumentError catch (e) {
-      emit(state.copyWith(composerStatus: ComposerStatus.error, composerError: e.message.toString()));
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.error,
+          composerError: e.message.toString(),
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(
-        composerStatus: ComposerStatus.error,
-        composerError: 'Could not post right now. Check your connection and try again.',
-      ));
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.error,
+          composerError:
+              'Could not post right now. Check your connection and try again.',
+        ),
+      );
     }
   }
 
-  Future<void> _onReplySubmitted(ReplySubmitted event, Emitter<CommunityState> emit) async {
+  Future<void> _onReplySubmitted(
+    ReplySubmitted event,
+    Emitter<CommunityState> emit,
+  ) async {
     emit(state.copyWith(replyStatus: ComposerStatus.submitting));
     try {
       final reply = await createReply(
@@ -120,11 +161,26 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
       );
       final updated = Map<String, List<Reply>>.from(state.localRepliesByPostId);
       updated[event.postId] = [...state.repliesFor(event.postId), reply];
-      emit(state.copyWith(replyStatus: ComposerStatus.success, localRepliesByPostId: updated));
+      emit(
+        state.copyWith(
+          replyStatus: ComposerStatus.success,
+          localRepliesByPostId: updated,
+        ),
+      );
     } on ArgumentError catch (e) {
-      emit(state.copyWith(replyStatus: ComposerStatus.error, replyError: e.message.toString()));
+      emit(
+        state.copyWith(
+          replyStatus: ComposerStatus.error,
+          replyError: e.message.toString(),
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(replyStatus: ComposerStatus.error, replyError: 'Reply did not send. Try again.'));
+      emit(
+        state.copyWith(
+          replyStatus: ComposerStatus.error,
+          replyError: 'Reply did not send. Try again.',
+        ),
+      );
     }
   }
 }

@@ -34,12 +34,14 @@ class _EmergencyDispatchPageState extends State<EmergencyDispatchPage> {
   @override
   void initState() {
     super.initState();
-    context.read<EmergencyBloc>().add(SosTriggered(
-          userId: widget.userId,
-          clinicId: widget.clinicId,
-          latitude: widget.latitude,
-          longitude: widget.longitude,
-        ));
+    context.read<EmergencyBloc>().add(
+      SosTriggered(
+        userId: widget.userId,
+        clinicId: widget.clinicId,
+        latitude: widget.latitude,
+        longitude: widget.longitude,
+      ),
+    );
   }
 
   @override
@@ -47,7 +49,8 @@ class _EmergencyDispatchPageState extends State<EmergencyDispatchPage> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: BlocListener<EmergencyBloc, EmergencyState>(
-        listenWhen: (previous, current) => previous.sosStatus != current.sosStatus,
+        listenWhen: (previous, current) =>
+            previous.sosStatus != current.sosStatus,
         listener: (context, state) {
           if (state.sosStatus == SosStatus.cancelled) Navigator.pop(context);
         },
@@ -71,8 +74,11 @@ class _EmergencyDispatchPageState extends State<EmergencyDispatchPage> {
               ],
             ),
           ),
-          bottomNavigationBar:
-              SafeMomBottomNav(currentIndex: -1, onTabSelected: (_) {}, onSosPressed: () {}),
+          bottomNavigationBar: SafeMomBottomNav(
+            currentIndex: -1,
+            onTabSelected: (_) {},
+            onSosPressed: () {},
+          ),
         ),
       ),
     );
@@ -91,13 +97,18 @@ class _EmergencyDispatchPageState extends State<EmergencyDispatchPage> {
           icon: Icons.error_outline_rounded,
           label: state.sosError ?? 'Something went wrong.',
           action: TextButton(
-            onPressed: () => context.read<EmergencyBloc>().add(SosTriggered(
-                  userId: widget.userId,
-                  clinicId: widget.clinicId,
-                  latitude: widget.latitude,
-                  longitude: widget.longitude,
-                )),
-            child: const Text('Try again', style: TextStyle(color: Colors.white)),
+            onPressed: () => context.read<EmergencyBloc>().add(
+              SosTriggered(
+                userId: widget.userId,
+                clinicId: widget.clinicId,
+                latitude: widget.latitude,
+                longitude: widget.longitude,
+              ),
+            ),
+            child: const Text(
+              'Try again',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         );
       case SosStatus.cancelling:
@@ -122,7 +133,12 @@ class _CenteredMessage extends StatelessWidget {
   final Widget? action;
   final Widget? child;
 
-  const _CenteredMessage({this.icon, required this.label, this.action, this.child});
+  const _CenteredMessage({
+    this.icon,
+    required this.label,
+    this.action,
+    this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +156,10 @@ class _CenteredMessage extends StatelessWidget {
               textAlign: TextAlign.center,
               style: AppTextStyles.h3.copyWith(color: Colors.white),
             ),
-            if (action != null) ...[const SizedBox(height: AppSpacing.sm), action!],
+            if (action != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              action!,
+            ],
           ],
         ),
       ),
@@ -181,7 +200,10 @@ class _ActiveView extends StatelessWidget {
     final isCancelling = state.sosStatus == SosStatus.cancelling;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
+      ),
       child: Column(
         children: [
           Text(
@@ -193,14 +215,23 @@ class _ActiveView extends StatelessWidget {
           Container(
             width: 84,
             height: 84,
-            decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-            child: const Icon(Icons.local_hospital_rounded, color: AppColors.emergencyRed, size: 40),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.local_hospital_rounded,
+              color: AppColors.emergencyRed,
+              size: 40,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           if (request.etaMinutes != null)
             Text(
               'Estimated arrival  ·  ${request.etaMinutes} min',
-              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold).copyWith(color: Colors.white),
+              style: AppTextStyles.body
+                  .copyWith(fontWeight: FontWeight.bold)
+                  .copyWith(color: Colors.white),
             ),
           const SizedBox(height: AppSpacing.lg),
           if (request.driverName != null) _DriverCard(request: request),
@@ -214,20 +245,29 @@ class _ActiveView extends StatelessWidget {
                 backgroundColor: Colors.white,
                 side: const BorderSide(color: AppColors.emergencyRed),
                 padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(28),
+                ),
               ),
               onPressed: isCancelling
                   ? null
-                  : () => context.read<EmergencyBloc>().add(DispatchCancelRequested(userId)),
+                  : () => context.read<EmergencyBloc>().add(
+                      DispatchCancelRequested(userId),
+                    ),
               child: isCancelling
                   ? const SizedBox(
                       width: 20,
                       height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.emergencyRed),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.emergencyRed,
+                      ),
                     )
                   : Text(
                       'Cancel request',
-                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold).copyWith(color: AppColors.emergencyRed),
+                      style: AppTextStyles.body
+                          .copyWith(fontWeight: FontWeight.bold)
+                          .copyWith(color: AppColors.emergencyRed),
                     ),
             ),
           ),
@@ -246,7 +286,8 @@ class _DriverCard extends StatelessWidget {
     final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.isEmpty || parts.first.isEmpty) return '?';
     if (parts.length == 1) return parts.first.substring(0, 1).toUpperCase();
-    return (parts.first.substring(0, 1) + parts.last.substring(0, 1)).toUpperCase();
+    return (parts.first.substring(0, 1) + parts.last.substring(0, 1))
+        .toUpperCase();
   }
 
   Future<void> _call(BuildContext context) async {
@@ -266,15 +307,27 @@ class _DriverCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
         children: [
           Container(
             width: 44,
             height: 44,
             alignment: Alignment.center,
-            decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(10)),
-            child: Text(_initials, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            decoration: BoxDecoration(
+              color: Colors.black87,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              _initials,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -282,7 +335,12 @@ class _DriverCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('YOUR DRIVER', style: AppTextStyles.caption),
-                Text(request.driverName ?? '', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  request.driverName ?? '',
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 if (request.vehiclePlate != null)
                   Text(request.vehiclePlate!, style: AppTextStyles.caption),
               ],
@@ -293,7 +351,10 @@ class _DriverCard extends StatelessWidget {
               onPressed: () => _call(context),
               icon: const Icon(Icons.call_rounded),
               color: Colors.white,
-              style: IconButton.styleFrom(backgroundColor: AppColors.teal, shape: const CircleBorder()),
+              style: IconButton.styleFrom(
+                backgroundColor: AppColors.teal,
+                shape: const CircleBorder(),
+              ),
             ),
         ],
       ),
@@ -311,18 +372,25 @@ class _PartnerNotifiedCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(color: const Color(0xFFE3F3E9), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE3F3E9),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Row(
         children: [
           Icon(
-            notified ? Icons.check_circle_rounded : Icons.hourglass_empty_rounded,
+            notified
+                ? Icons.check_circle_rounded
+                : Icons.hourglass_empty_rounded,
             color: const Color(0xFF2E7D4F),
             size: 18,
           ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
-              notified ? 'Your partner has been notified.' : 'Notifying your partner...',
+              notified
+                  ? 'Your partner has been notified.'
+                  : 'Notifying your partner...',
               style: AppTextStyles.body,
             ),
           ),

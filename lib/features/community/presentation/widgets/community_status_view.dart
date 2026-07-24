@@ -31,7 +31,11 @@ class CommunityStatusView extends StatelessWidget {
             const SizedBox(height: AppSpacing.md),
             Text(title, style: AppTextStyles.h3, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.xs),
-            Text(message, style: AppTextStyles.body, textAlign: TextAlign.center),
+            Text(
+              message,
+              style: AppTextStyles.body,
+              textAlign: TextAlign.center,
+            ),
             if (actionLabel != null && onAction != null) ...[
               const SizedBox(height: AppSpacing.md),
               SecondaryButton(label: actionLabel!, onPressed: onAction!),

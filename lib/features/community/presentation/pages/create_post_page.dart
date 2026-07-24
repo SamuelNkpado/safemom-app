@@ -12,6 +12,7 @@ import '../bloc/community_bloc.dart';
 import '../bloc/community_event.dart';
 import '../bloc/community_state.dart';
 
+/// Screen 11 — Anonymous Post / Create Post.
 class CreatePostPage extends StatefulWidget {
   const CreatePostPage({super.key});
 
@@ -24,7 +25,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   bool _isAnonymous = false;
   bool _prefilledDefault = false;
 
-  static const _maxLength = 2000;
+  static const _maxLength = 2000; // matches the real CreatePost usecase's limit
 
   @override
   void dispose() {
@@ -196,7 +197,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       onPressed: () {
                         final text = _controller.text.trim();
                         final user = context.read<AuthBloc>().state.user;
-                        if (text.length < 3 || isSubmitting || user == null) return;
+                        if (text.length < 3 || isSubmitting || user == null) {
+                          return;
+                        }
                         FocusScope.of(context).unfocus();
                         context.read<CommunityBloc>().add(
                               PostSubmitted(

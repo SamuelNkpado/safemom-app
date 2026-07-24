@@ -4,7 +4,9 @@ import '../../domain/entities/post.dart';
 import '../../domain/entities/reply.dart';
 
 enum GroupStatus { initial, loading, success, error }
+
 enum FeedStatus { initial, loading, success, error }
+
 enum ComposerStatus { idle, submitting, success, error }
 
 class CommunityState extends Equatable {
@@ -42,7 +44,8 @@ class CommunityState extends Equatable {
     this.localRepliesByPostId = const {},
   });
 
-  List<Reply> repliesFor(String postId) => localRepliesByPostId[postId] ?? const [];
+  List<Reply> repliesFor(String postId) =>
+      localRepliesByPostId[postId] ?? const [];
 
   CommunityState copyWith({
     GroupStatus? groupStatus,
@@ -78,18 +81,18 @@ class CommunityState extends Equatable {
 
   @override
   List<Object?> get props => [
-        groupStatus,
-        group,
-        groupError,
-        feedStatus,
-        posts,
-        feedError,
-        defaultAnonymous,
-        composerStatus,
-        composerError,
-        lastSubmittedPost,
-        replyStatus,
-        replyError,
-        localRepliesByPostId,
-      ];
+    groupStatus,
+    group,
+    groupError,
+    feedStatus,
+    posts,
+    feedError,
+    defaultAnonymous,
+    composerStatus,
+    composerError,
+    lastSubmittedPost,
+    replyStatus,
+    replyError,
+    localRepliesByPostId,
+  ];
 }

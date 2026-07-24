@@ -29,7 +29,9 @@ class ReplyTile extends StatelessWidget {
                 ? Colors.grey.withValues(alpha: 0.15)
                 : AppColors.teal.withValues(alpha: 0.15),
             child: Icon(
-              reply.isAnonymous ? Icons.visibility_off_rounded : Icons.person_rounded,
+              reply.isAnonymous
+                  ? Icons.visibility_off_rounded
+                  : Icons.person_rounded,
               size: 14,
               color: reply.isAnonymous ? Colors.grey : AppColors.teal,
             ),
@@ -45,7 +47,12 @@ class ReplyTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_displayName, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    _displayName,
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Text(reply.body, style: AppTextStyles.body),
                 ],

@@ -8,6 +8,7 @@ import 'package:safemom/core/widgets/widgets.dart';
 import 'package:safemom/features/auth/presentation/bloc/auth_bloc.dart';
 
 import '../bloc/community_bloc.dart';
+import 'package:safemom/features/emergency/presentation/emergency_actions.dart'; // TEMP — for the test button below only
 import '../bloc/community_event.dart';
 import '../bloc/community_state.dart';
 import '../widgets/community_status_view.dart';
@@ -46,6 +47,11 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.cream,
+      floatingActionButton: FloatingActionButton.small(
+        backgroundColor: AppColors.emergencyRed,
+        onPressed: () => launchEmergencySos(context),
+        child: const Icon(Icons.sos_rounded, color: Colors.white),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -61,12 +67,18 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
           ? SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                  AppSpacing.md,
+                  AppSpacing.sm,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   child: PrimaryButton(
                     label: 'Create post',
-                    onPressed: () => Navigator.pushNamed(context, AppRoutes.createPost),
+                    onPressed: () =>
+                        Navigator.pushNamed(context, AppRoutes.createPost),
                   ),
                 ),
               ),
@@ -126,17 +138,23 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
                   return const CommunityStatusView(
                     icon: Icons.forum_outlined,
                     title: 'No posts yet',
-                    message: 'Be the first mama to share something with the group.',
+                    message:
+                        'Be the first mama to share something with the group.',
                   );
                 }
-                final currentUserId = context.read<AuthBloc>().state.user?.userId;
+                final currentUserId = context
+                    .read<AuthBloc>()
+                    .state
+                    .user
+                    ?.userId;
                 return RefreshIndicator(
                   color: AppColors.teal,
                   onRefresh: () async => _loadFeed(),
                   child: ListView.separated(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: state.posts.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (context, index) {
                       final post = state.posts[index];
                       return PostCard(
@@ -172,23 +190,38 @@ class _GroupHeader extends StatelessWidget {
         final group = state.group;
         return Padding(
           padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md, AppSpacing.sm, AppSpacing.md, AppSpacing.sm),
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            AppSpacing.sm,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Expanded(child: Text(group?.name ?? 'Community', style: AppTextStyles.h2)),
+                  Expanded(
+                    child: Text(
+                      group?.name ?? 'Community',
+                      style: AppTextStyles.h2,
+                    ),
+                  ),
                   CircleAvatar(
                     radius: 18,
                     backgroundColor: AppColors.teal.withValues(alpha: 0.15),
-                    child: const Icon(Icons.groups_rounded, color: AppColors.teal),
+                    child: const Icon(
+                      Icons.groups_rounded,
+                      color: AppColors.teal,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 2),
               if (group != null)
-                Text('${group.memberCount} members', style: AppTextStyles.caption),
+                Text(
+                  '${group.memberCount} members',
+                  style: AppTextStyles.caption,
+                ),
               const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
@@ -224,7 +257,11 @@ class _SectionTab extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
 
-  const _SectionTab({required this.label, required this.isActive, required this.onTap});
+  const _SectionTab({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -242,9 +279,9 @@ class _SectionTab extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             label,
-            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold).copyWith(
-              color: isActive ? Colors.white : AppColors.teal,
-            ),
+            style: AppTextStyles.body
+                .copyWith(fontWeight: FontWeight.bold)
+                .copyWith(color: isActive ? Colors.white : AppColors.teal),
           ),
         ),
       ),

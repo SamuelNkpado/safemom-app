@@ -38,11 +38,17 @@ class PostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor:
-                      post.isAnonymous ? const Color(0xFFF0A98A) : AppColors.teal,
+                  backgroundColor: post.isAnonymous
+                      ? const Color(0xFFF0A98A)
+                      : AppColors.teal,
                   child: Text(
-                    _displayName.isNotEmpty ? _displayName[0].toUpperCase() : '?',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    _displayName.isNotEmpty
+                        ? _displayName[0].toUpperCase()
+                        : '?',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -50,7 +56,12 @@ class PostCard extends StatelessWidget {
                   child: Text.rich(
                     TextSpan(
                       children: [
-                        TextSpan(text: _displayName, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold)),
+                        TextSpan(
+                          text: _displayName,
+                          style: AppTextStyles.body.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         if (post.pregnancyWeekAtPost != null)
                           TextSpan(
                             text: '  ·  Week ${post.pregnancyWeekAtPost}',
@@ -66,12 +77,18 @@ class PostCard extends StatelessWidget {
                 ),
                 if (post.isPending)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.amber.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text('Pending review', style: TextStyle(fontSize: 10)),
+                    child: const Text(
+                      'Pending review',
+                      style: TextStyle(fontSize: 10),
+                    ),
                   ),
               ],
             ),
@@ -80,7 +97,11 @@ class PostCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                Icon(Icons.favorite_border_rounded, size: 18, color: Colors.grey),
+                Icon(
+                  Icons.favorite_border_rounded,
+                  size: 18,
+                  color: Colors.grey,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '${post.likesCount} ${post.likesCount == 1 ? 'like' : 'likes'}',

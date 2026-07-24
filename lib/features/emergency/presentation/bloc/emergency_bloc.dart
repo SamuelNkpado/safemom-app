@@ -26,11 +26,17 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
     // add() rather than emitted directly from the stream listener, since
     // that listener can fire after the handler that created it has already
     // completed, which bloc disallows (and will throw in debug builds).
-    on<_RequestUpdated>((event, emit) =>
-        emit(state.copyWith(sosStatus: SosStatus.active, request: event.request)));
+    on<_RequestUpdated>(
+      (event, emit) => emit(
+        state.copyWith(sosStatus: SosStatus.active, request: event.request),
+      ),
+    );
   }
 
-  Future<void> _onSosTriggered(SosTriggered event, Emitter<EmergencyState> emit) async {
+  Future<void> _onSosTriggered(
+    SosTriggered event,
+    Emitter<EmergencyState> emit,
+  ) async {
     emit(state.copyWith(sosStatus: SosStatus.sending, sosError: null));
     try {
       EmergencyRequest request;
@@ -60,22 +66,34 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
       }
 
       await _requestSub?.cancel();
-      _requestSub = repository.watchRequest(request.requestId).listen((updated) {
+      _requestSub = repository.watchRequest(request.requestId).listen((
+        updated,
+      ) {
         add(_RequestUpdated(updated));
       });
     } on ArgumentError catch (e) {
-      emit(state.copyWith(sosStatus: SosStatus.error, sosError: e.message.toString()));
+      emit(
+        state.copyWith(
+          sosStatus: SosStatus.error,
+          sosError: e.message.toString(),
+        ),
+      );
     } on EmergencyException catch (e) {
       emit(state.copyWith(sosStatus: SosStatus.error, sosError: e.message));
     } catch (_) {
-      emit(state.copyWith(
-        sosStatus: SosStatus.error,
-        sosError: 'SOS could not be sent. Call your clinic directly.',
-      ));
+      emit(
+        state.copyWith(
+          sosStatus: SosStatus.error,
+          sosError: 'SOS could not be sent. Call your clinic directly.',
+        ),
+      );
     }
   }
 
-  Future<void> _onDispatchCancelRequested(DispatchCancelRequested event, Emitter<EmergencyState> emit) async {
+  Future<void> _onDispatchCancelRequested(
+    DispatchCancelRequested event,
+    Emitter<EmergencyState> emit,
+  ) async {
     final requestId = state.request?.requestId;
     if (requestId == null) return;
     emit(state.copyWith(sosStatus: SosStatus.cancelling));
@@ -86,10 +104,13 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
     } on StateError catch (e) {
       emit(state.copyWith(sosStatus: SosStatus.error, sosError: e.message));
     } catch (_) {
-      emit(state.copyWith(
-        sosStatus: SosStatus.error,
-        sosError: 'Could not cancel — call your clinic directly if help is no longer needed.',
-      ));
+      emit(
+        state.copyWith(
+          sosStatus: SosStatus.error,
+          sosError:
+              'Could not cancel — call your clinic directly if help is no longer needed.',
+        ),
+      );
     }
   }
 
