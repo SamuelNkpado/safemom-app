@@ -20,4 +20,5 @@ class AppRoutes {
   static const String communityPost = '/community/post';
   static const String createPost = '/community/create';
   static const String appointments = '/profile/appointments';
+  static const String communityFeed = '/community';
 }

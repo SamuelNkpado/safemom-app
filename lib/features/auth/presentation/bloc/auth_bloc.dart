@@ -18,6 +18,12 @@ import 'auth_state.dart';
 /// The repository owns the auth-state stream; every other action is a
 /// use case call. The bloc turns those async calls into UI-friendly
 /// states (idle, submitting, success, failure).
+///
+/// Two failure paths are handled on every form action:
+/// [AuthException] for backend/Firebase failures (wrong password, user
+/// not found), and [ArgumentError] for validation failures raised by the
+/// use cases before the request ever reaches Firebase. Both must surface
+/// as a readable message rather than an unhandled exception.
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required AuthRepository authRepository,
@@ -92,6 +98,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         formStatus: AuthFormStatus.failure,
         errorMessage: error.message,
       ));
+    } on ArgumentError catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message.toString(),
+      ));
     }
   }
 
@@ -118,6 +129,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         formStatus: AuthFormStatus.failure,
         errorMessage: error.message,
       ));
+    } on ArgumentError catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message.toString(),
+      ));
     }
   }
 
@@ -137,6 +153,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(
         formStatus: AuthFormStatus.failure,
         errorMessage: error.message,
+      ));
+    } on ArgumentError catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message.toString(),
       ));
     }
   }
@@ -161,6 +182,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(
         formStatus: AuthFormStatus.failure,
         errorMessage: error.message,
+      ));
+    } on ArgumentError catch (error) {
+      emit(state.copyWith(
+        formStatus: AuthFormStatus.failure,
+        errorMessage: error.message.toString(),
       ));
     }
   }

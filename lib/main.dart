@@ -9,6 +9,15 @@ import 'core/router/app_routes.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/domain/repositories/auth_repository.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/community/domain/usecases/create_post.dart';
+import 'features/community/domain/usecases/create_reply.dart';
+import 'features/community/domain/usecases/get_available_groups.dart';
+import 'features/community/domain/usecases/get_group_posts.dart';
+import 'features/community/presentation/bloc/community_bloc.dart';
+import 'features/emergency/domain/repositories/emergency_repository.dart';
+import 'features/emergency/domain/usecases/cancel_emergency.dart';
+import 'features/emergency/domain/usecases/request_emergency.dart';
+import 'features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'features/profile/domain/entities/user_preferences.dart' as prefs_entity;
 import 'features/profile/domain/repositories/preferences_repository.dart';
 import 'firebase_options.dart';
@@ -29,8 +38,27 @@ class SafeMomApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final preferencesRepo = getIt<PreferencesRepository>();
 
-    return BlocProvider<AuthBloc>(
-      create: (_) => AuthLocator.buildBloc(authRepository),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (_) => AuthLocator.buildBloc(authRepository),
+        ),
+        BlocProvider<CommunityBloc>(
+          create: (_) => CommunityBloc(
+            getAvailableGroups: getIt<GetAvailableGroups>(),
+            getGroupPosts: getIt<GetGroupPosts>(),
+            createPost: getIt<CreatePost>(),
+            createReply: getIt<CreateReply>(),
+          ),
+        ),
+        BlocProvider<EmergencyBloc>(
+          create: (_) => EmergencyBloc(
+            requestEmergency: getIt<RequestEmergency>(),
+            cancelEmergency: getIt<CancelEmergency>(),
+            repository: getIt<EmergencyRepository>(),
+          ),
+        ),
+      ],
       child: StreamBuilder<prefs_entity.UserPreferences>(
         stream: preferencesRepo.watchPreferences(),
         builder: (context, snapshot) {
