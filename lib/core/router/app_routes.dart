@@ -11,13 +11,16 @@ class AppRoutes {
   static const String login = '/login';
   static const String signup = '/signup'; // 4-step sign-up wizard
   static const String resetPassword = '/reset-password';
+  static const String resetPasswordConfirmation = '/reset-password-confirmation';
 
   // Emergency (owner: Brenda)
   static const String emergency = '/emergency';
 
   // Feature detail routes (owner: partner)
   static const String symptomLog = '/symptoms/log';
+  static const String dangerCheck = '/symptoms/danger-check';
   static const String communityPost = '/community/post';
   static const String createPost = '/community/create';
   static const String appointments = '/profile/appointments';
+
 }

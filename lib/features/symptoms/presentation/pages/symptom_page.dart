@@ -10,6 +10,7 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../domain/entities/symptom_log.dart';
 import '../../domain/usecases/log_symptom.dart';
+import '../../../../core/router/app_routes.dart';
 
 class SymptomPage extends StatefulWidget {
   const SymptomPage({super.key});
@@ -125,6 +126,42 @@ class _SymptomPageState extends State<SymptomPage> {
             children: [
               Text('What are you feeling today?', style: AppTextStyles.h1),
               const SizedBox(height: AppSpacing.lg),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          AppRoutes.dangerCheck,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.softCoral,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                            border: Border.all(color: AppColors.coral),
+                          ),
+                          child: Row(
+                            children: [
+                              const Text('⚠️', style: TextStyle(fontSize: 18)),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  'Safety check',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.textPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
 
               // Symptom grid
               GridView.count(
