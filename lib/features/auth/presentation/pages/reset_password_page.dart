@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:safemom/core/router/app_routes.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -54,10 +55,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         listener: (context, state) {
           if (state.formStatus == AuthFormStatus.success &&
               state.infoMessage != null) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(content: Text(state.infoMessage!)));
-            Navigator.pop(context);
+            // Navigate to confirmation screen with email
+            Navigator.of(context).pushReplacementNamed(
+              AppRoutes.resetPasswordConfirmation,
+              arguments: _email.text.trim(),
+            );
           } else if (state.formStatus == AuthFormStatus.failure &&
               state.errorMessage != null) {
             ScaffoldMessenger.of(context)
