@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/presentation/bloc/auth_state.dart';
-import '../../features/community/presentation/pages/community_page.dart';
+import '../../features/community/presentation/pages/community_feed_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/symptoms/presentation/pages/symptom_page.dart';
@@ -29,7 +29,7 @@ class _MainNavShellState extends State<MainNavShell> {
   static const List<Widget> _tabs = <Widget>[
     HomePage(),
     SymptomPage(),
-    CommunityPage(),
+    CommunityFeedPage(),
     ProfilePage(),
   ];
 
