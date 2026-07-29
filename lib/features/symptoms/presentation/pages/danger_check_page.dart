@@ -10,6 +10,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/widgets.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../emergency/presentation/emergency_actions.dart';
 import '../../domain/usecases/run_danger_check.dart';
 
 class DangerCheckPage extends StatefulWidget {
@@ -120,12 +121,12 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
       if (!mounted) return;
 
       final hasHighRisk =
-          _selectedIndicators.any((id) {
-            return _indicators
-                .firstWhere((ind) => ind.id == id)
-                .riskLevel ==
-                'high';
-          });
+      _selectedIndicators.any((id) {
+        return _indicators
+            .firstWhere((ind) => ind.id == id)
+            .riskLevel ==
+            'high';
+      });
 
       _showResultDialog(hasHighRisk ? 'high' : 'medium');
 
@@ -180,7 +181,7 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
                   border: Border.all(color: AppColors.coral),
                 ),
                 child: Text(
-                  'In an emergency, tap the SOS button in the app or call emergency services.',
+                  'Use the button below to send an SOS alert, or call emergency services.',
                   style: AppTextStyles.bodySmall,
                   textAlign: TextAlign.center,
                 ),
@@ -188,10 +189,24 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
           ],
         ),
         actions: [
+          if (isHighRisk)
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx); // close the result dialog first
+                launchEmergencySos(context); // use the PAGE context, not ctx
+              },
+              child: Text(
+                'Get help now',
+                style: AppTextStyles.button.copyWith(
+                  color: AppColors.emergencyRed,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
-              'Got it',
+              isHighRisk ? 'Not now' : 'Got it',
               style: AppTextStyles.button.copyWith(
                 color: AppColors.teal,
               ),
@@ -207,10 +222,10 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
       SnackBar(
         content: Text(message,
             style: AppTextStyles.body.copyWith(
-          color: AppColors.textOnColor,
-        )),
+              color: AppColors.textOnColor,
+            )),
         backgroundColor:
-            isError ? AppColors.emergencyRed : AppColors.successGreen,
+        isError ? AppColors.emergencyRed : AppColors.successGreen,
       ),
     );
   }
@@ -224,10 +239,10 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
         elevation: 0,
         leading: Navigator.canPop(context)
             ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                color: AppColors.textPrimary,
-                onPressed: () => Navigator.pop(context),
-              )
+          icon: const Icon(Icons.arrow_back),
+          color: AppColors.textPrimary,
+          onPressed: () => Navigator.pop(context),
+        )
             : null,
         title: Text('Safety check', style: AppTextStyles.h2),
       ),
@@ -257,13 +272,13 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
                 final isSelected = _selectedIndicators.contains(indicator.id);
                 final borderColor = isSelected
                     ? (indicator.riskLevel == 'high'
-                        ? AppColors.emergencyRed
-                        : AppColors.warningAmber)
+                    ? AppColors.emergencyRed
+                    : AppColors.warningAmber)
                     : AppColors.borderDefault;
                 final bgColor = isSelected
                     ? (indicator.riskLevel == 'high'
-                        ? AppColors.softCoral
-                        : AppColors.softTeal)
+                    ? AppColors.softCoral
+                    : AppColors.softTeal)
                     : AppColors.cardSurface;
 
                 return Padding(
@@ -301,8 +316,8 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
                                   style: AppTextStyles.h3.copyWith(
                                     color: isSelected
                                         ? (indicator.riskLevel == 'high'
-                                            ? AppColors.emergencyRed
-                                            : AppColors.warningAmber)
+                                        ? AppColors.emergencyRed
+                                        : AppColors.warningAmber)
                                         : AppColors.textPrimary,
                                   ),
                                 ),
@@ -326,8 +341,8 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
                               });
                             },
                             fillColor:
-                                MaterialStateProperty.resolveWith((states) {
-                              if (states.contains(MaterialState.selected)) {
+                            WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.selected)) {
                                 return indicator.riskLevel == 'high'
                                     ? AppColors.emergencyRed
                                     : AppColors.warningAmber;
@@ -343,7 +358,7 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
                     ),
                   ),
                 );
-              }).toList(),
+              }),
 
               const SizedBox(height: AppSpacing.xl),
 
@@ -379,7 +394,7 @@ class _DangerCheckPageState extends State<DangerCheckPage> {
                 label: 'Submit safety check',
                 isLoading: _isSubmitting,
                 onPressed:
-                    _selectedIndicators.isEmpty ? null : _submitCheck,
+                _selectedIndicators.isEmpty ? null : _submitCheck,
               ),
               const SizedBox(height: AppSpacing.md),
             ],

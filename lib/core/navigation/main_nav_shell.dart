@@ -7,11 +7,12 @@ import '../../features/community/presentation/pages/community_feed_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/symptoms/presentation/pages/symptom_page.dart';
-import '../constants/app_colors.dart';
 import '../router/app_routes.dart';
+import '../widgets/safemom_bottom_nav.dart';
 
-/// Bottom-nav host for the four main tabs. Screens live in their own
-/// feature folders and are wired here.
+/// Bottom-nav host for the four main tabs, using the shared SafeMomBottomNav
+/// (raised SOS button in the centre). Screens live in their own feature
+/// folders and are wired here.
 ///
 /// Also acts as the global sign-out listener — if the AuthBloc emits
 /// `unauthenticated` while the user is on any tab, we navigate them
@@ -26,12 +27,37 @@ class MainNavShell extends StatefulWidget {
 class _MainNavShellState extends State<MainNavShell> {
   int _currentIndex = 0;
 
+  // Demo-safe emergency inputs. The User entity carries no lat/lng, so
+  // coordinates are a fixed Kigali location for the demo. clinicId prefers
+  // the user's real selectedClinicId and only falls back to this if null.
+  static const double _demoLatitude = -1.9441;
+  static const double _demoLongitude = 30.0619;
+  static const String _demoClinicId = 'demo-clinic-kigali';
+
   static const List<Widget> _tabs = <Widget>[
     HomePage(),
     SymptomPage(),
     CommunityFeedPage(),
     ProfilePage(),
   ];
+
+  void _onSosPressed() {
+    // Shell only renders when authenticated, but guard anyway so a null user
+    // never reaches the required-args route.
+    final user = context.read<AuthBloc>().state.user;
+    if (user == null) return;
+
+    Navigator.pushNamed(
+      context,
+      AppRoutes.emergency,
+      arguments: <String, dynamic>{
+        'userId': user.userId,
+        'clinicId': user.selectedClinicId ?? _demoClinicId,
+        'latitude': _demoLatitude,
+        'longitude': _demoLongitude,
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,35 +76,10 @@ class _MainNavShellState extends State<MainNavShell> {
           index: _currentIndex,
           children: _tabs,
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
+        bottomNavigationBar: SafeMomBottomNav(
           currentIndex: _currentIndex,
-          backgroundColor: AppColors.cardSurface,
-          selectedItemColor: AppColors.teal,
-          unselectedItemColor: AppColors.textSecondary,
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.monitor_heart_outlined),
-              activeIcon: Icon(Icons.monitor_heart),
-              label: 'Symptoms',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.people_outline),
-              activeIcon: Icon(Icons.people),
-              label: 'Community',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
+          onTabSelected: (index) => setState(() => _currentIndex = index),
+          onSosPressed: _onSosPressed,
         ),
       ),
     );

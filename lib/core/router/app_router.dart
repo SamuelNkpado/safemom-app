@@ -8,6 +8,7 @@ import '../../features/community/domain/entities/post.dart';
 import '../../features/community/presentation/pages/community_feed_page.dart';
 import '../../features/community/presentation/pages/create_post_page.dart';
 import '../../features/community/presentation/pages/post_detail_page.dart';
+import '../../features/emergency/presentation/pages/emergency_dispatch_page.dart';
 import '../../features/symptoms/presentation/pages/danger_check_page.dart';
 import '../../features/symptoms/presentation/pages/symptom_page.dart';
 import '../navigation/main_nav_shell.dart';
@@ -39,6 +40,30 @@ class AppRouter {
         return _page(const SymptomPage(), settings);
       case AppRoutes.dangerCheck:
         return _page(const DangerCheckPage(), settings);
+    // Emergency (owner: Brenda) — EmergencyBloc is provided at the app root
+    // (see main.dart MultiBlocProvider), so no BlocProvider wrapper is needed
+    // here. The page needs four required args, passed as a route-arguments map.
+      case AppRoutes.emergency:
+        final args = settings.arguments as Map<String, dynamic>?;
+        if (args == null) {
+          return _page(
+            const Scaffold(
+              body: Center(
+                child: Text('Emergency dispatch is missing its details.'),
+              ),
+            ),
+            settings,
+          );
+        }
+        return _page(
+          EmergencyDispatchPage(
+            userId: args['userId'] as String,
+            clinicId: args['clinicId'] as String,
+            latitude: args['latitude'] as double,
+            longitude: args['longitude'] as double,
+          ),
+          settings,
+        );
     // Community (owner: Brenda)
       case AppRoutes.communityFeed:
         return _page(const CommunityFeedPage(), settings);
