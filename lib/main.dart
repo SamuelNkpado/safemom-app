@@ -17,10 +17,13 @@ import 'features/community/presentation/bloc/community_bloc.dart';
 import 'features/emergency/domain/repositories/emergency_repository.dart';
 import 'features/emergency/domain/usecases/cancel_emergency.dart';
 import 'features/emergency/domain/usecases/request_emergency.dart';
+import 'features/community/domain/usecases/update_post.dart';
+import 'features/community/domain/usecases/delete_post.dart';
 import 'features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'features/profile/domain/entities/user_preferences.dart' as prefs_entity;
 import 'features/profile/domain/repositories/preferences_repository.dart';
 import 'firebase_options.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,12 +46,15 @@ class SafeMomApp extends StatelessWidget {
         BlocProvider<AuthBloc>(
           create: (_) => AuthLocator.buildBloc(authRepository),
         ),
+
         BlocProvider<CommunityBloc>(
           create: (_) => CommunityBloc(
             getAvailableGroups: getIt<GetAvailableGroups>(),
             getGroupPosts: getIt<GetGroupPosts>(),
             createPost: getIt<CreatePost>(),
             createReply: getIt<CreateReply>(),
+            updatePost: getIt<UpdatePost>(),
+            deletePost: getIt<DeletePost>(),
           ),
         ),
         BlocProvider<EmergencyBloc>(

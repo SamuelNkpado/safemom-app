@@ -73,6 +73,12 @@ abstract class CommunityRepository {
   /// Delete a post. Only the author can delete their own posts.
   Future<void> deletePost(String postId);
 
+  /// Update the body text of a post. Only the author can edit their own posts.
+  Future<void> updatePost({
+    required String postId,
+    required String body,
+  });
+
   /// Increment or decrement the likes count on a post.
   Future<void> toggleLikePost({
     required String postId,

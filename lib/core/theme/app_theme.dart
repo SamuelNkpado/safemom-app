@@ -127,7 +127,7 @@ class AppTheme {
         ),
       ),
       dividerColor: darkBorder,
-      dialogBackgroundColor: darkSurface,
+      dialogTheme: const DialogThemeData(backgroundColor: darkSurface),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: darkSurface,
         selectedItemColor: AppColors.teal,

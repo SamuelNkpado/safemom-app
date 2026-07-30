@@ -214,7 +214,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             ),
                           );
                         },
-                        errorBuilder: (_, __, ___) => Container(
+                        errorBuilder: (context, error, stackTrace) => Container(
                           color: AppColors.cardSurface,
                           alignment: Alignment.center,
                           child: Column(

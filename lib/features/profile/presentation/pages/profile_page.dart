@@ -378,7 +378,7 @@ class _SettingsSwitchRow extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: AppColors.teal,
+            activeThumbColor: AppColors.teal,
           ),
         ],
       ),

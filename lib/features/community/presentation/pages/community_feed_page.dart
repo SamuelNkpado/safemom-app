@@ -135,7 +135,7 @@ class _CommunityFeedPageState extends State<CommunityFeedPage> {
                     child: Image.network(
                       post.photoUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (context, error, stackTrace) => Container(
                         color: AppColors.cardSurface,
                         child: const Icon(
                           Icons.broken_image_outlined,

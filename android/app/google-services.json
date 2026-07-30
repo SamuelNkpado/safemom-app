@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "944674009864-7qhdjbtpt7ja6avunbdnsj982dtp132i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "rw.alu.safemom.safemom",
+            "certificate_hash": "f8d9b8a851e0a5f95cb1c5ed95099ed2b8882c02"
+          }
+        },
+        {
           "client_id": "944674009864-3aj56tj7t4i8a1clb1obvcp8q95ra1gv.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "944674009864-3aj56tj7t4i8a1clb1obvcp8q95ra1gv.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "944674009864-i7tu6f3s1cc2pa95niseipm5fg85khvg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "rw.alu.safemom.safemom"
+              }
             }
           ]
         }

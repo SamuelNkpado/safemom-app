@@ -148,8 +148,8 @@ class _CenteredMessage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (child != null) child!,
-            if (icon != null) Icon(icon, color: Colors.white, size: 48),
+            ?child,
+            if (icon case final i?) Icon(i, color: Colors.white, size: 48),
             const SizedBox(height: AppSpacing.md),
             Text(
               label,

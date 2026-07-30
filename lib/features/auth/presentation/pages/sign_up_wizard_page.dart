@@ -293,7 +293,7 @@ class _SignUpWizardPageState extends State<SignUpWizardPage> {
         Expanded(
           child: ListView.separated(
             itemCount: _clinics.length,
-            separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+            separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.md),
             itemBuilder: (context, i) {
               final c = _clinics[i];
               return ClinicOptionTile(

@@ -205,6 +205,31 @@ class CommunityFirestoreDatasource {
     await _postsCollection.doc(postId).delete();
   }
 
+  Future<void> updatePost({
+    required String postId,
+    required String body,
+  }) async {
+    // Re-run the same danger-keyword moderation as createPost, so an edit
+    // can't be used to slip a flagged term past moderation.
+    final dangerKeywords = [
+      'bleeding',
+      'contractions',
+      'severe pain',
+      'emergency',
+      'help me',
+      'no movement',
+    ];
+    final lowerBody = body.toLowerCase();
+    final needsModeration =
+    dangerKeywords.any((kw) => lowerBody.contains(kw));
+
+    await _postsCollection.doc(postId).update({
+      'body': body,
+      'moderation_status': needsModeration ? 'pending' : 'approved',
+      'edited_at': Timestamp.fromDate(DateTime.now()),
+    });
+  }
+
   Future<void> toggleLikePost({
     required String postId,
     required bool liked,

@@ -24,15 +24,115 @@ class _PostDetailPageState extends State<PostDetailPage> {
   final _replyController = TextEditingController();
   bool _replyAnonymous = false;
 
+  // Local copy of the post body so an edit shows on this page immediately.
+  late String _body;
+
+  @override
+  void initState() {
+    super.initState();
+    _body = widget.post.body;
+  }
+
   @override
   void dispose() {
     _replyController.dispose();
     super.dispose();
   }
 
+  void _openEditDialog(BuildContext context, String currentUserId) {
+    final controller = TextEditingController(text: _body);
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.cardSurface,
+        title: Text('Edit post', style: AppTextStyles.h3),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLines: 5,
+          minLines: 1,
+          style: AppTextStyles.body,
+          decoration: const InputDecoration(
+            hintText: 'Update your post...',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Cancel', style: AppTextStyles.button),
+          ),
+          TextButton(
+            onPressed: () {
+              final newBody = controller.text.trim();
+              if (newBody.isEmpty) return;
+              context.read<CommunityBloc>().add(
+                PostEdited(
+                  postId: widget.post.postId,
+                  authorUserId: currentUserId,
+                  body: newBody,
+                ),
+              );
+              // Update this page immediately.
+              setState(() => _body = newBody);
+              Navigator.pop(dialogContext);
+            },
+            child: Text(
+              'Save',
+              style: AppTextStyles.button.copyWith(
+                color: AppColors.teal,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, String currentUserId) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.cardSurface,
+        title: Text('Delete post?', style: AppTextStyles.h3),
+        content: Text(
+          'This permanently removes your post. This cannot be undone.',
+          style: AppTextStyles.body,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text('Cancel', style: AppTextStyles.button),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<CommunityBloc>().add(
+                PostDeleted(
+                  postId: widget.post.postId,
+                  authorUserId: currentUserId,
+                ),
+              );
+              Navigator.pop(dialogContext); // close the confirm dialog
+              Navigator.pop(context); // leave the detail page, back to feed
+            },
+            child: Text(
+              'Delete',
+              style: AppTextStyles.button.copyWith(
+                color: AppColors.emergencyRed,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUserId = context.read<AuthBloc>().state.user?.userId;
+    final isOwnPost = widget.post.authorUserId == currentUserId;
 
     return Scaffold(
       backgroundColor: AppColors.cream,
@@ -43,7 +143,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       ),
       body: BlocConsumer<CommunityBloc, CommunityState>(
         listenWhen: (previous, current) =>
-            previous.replyStatus != current.replyStatus,
+        previous.replyStatus != current.replyStatus,
         listener: (context, state) {
           if (state.replyStatus == ComposerStatus.success) {
             _replyController.clear();
@@ -57,6 +157,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
           final localReplies = state.repliesFor(widget.post.postId);
           final isSendingReply = state.replyStatus == ComposerStatus.submitting;
 
+          // Render with the possibly-edited body.
+          final displayedPost = widget.post.copyWith(body: _body);
+
           return Column(
             children: [
               Expanded(
@@ -64,9 +167,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
                   padding: const EdgeInsets.all(AppSpacing.md),
                   children: [
                     PostCard(
-                      post: widget.post,
-                      isOwnPost: widget.post.authorUserId == currentUserId,
+                      post: displayedPost,
+                      isOwnPost: isOwnPost,
                       onTap: () {},
+                      onEdit: isOwnPost && currentUserId != null
+                          ? () => _openEditDialog(context, currentUserId)
+                          : null,
+                      onDelete: isOwnPost && currentUserId != null
+                          ? () => _confirmDelete(context, currentUserId)
+                          : null,
                     ),
                     const SizedBox(height: AppSpacing.lg),
                     Text(
@@ -91,7 +200,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                         child: Text(
                           "This post has ${widget.post.repliesCount} repl${widget.post.repliesCount == 1 ? 'y' : 'ies'} "
-                          "that can't be listed yet — showing replies sent this session below.",
+                              "that can't be listed yet — showing replies sent this session below.",
                           style: AppTextStyles.caption,
                         ),
                       ),
@@ -145,37 +254,37 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       ),
                       isSendingReply
                           ? const Padding(
-                              padding: EdgeInsets.all(AppSpacing.sm),
-                              child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            )
+                        padding: EdgeInsets.all(AppSpacing.sm),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      )
                           : IconButton(
-                              icon: const Icon(
-                                Icons.send_rounded,
-                                color: AppColors.teal,
-                              ),
-                              onPressed: () {
-                                final text = _replyController.text.trim();
-                                final user = context
-                                    .read<AuthBloc>()
-                                    .state
-                                    .user;
-                                if (text.isEmpty || user == null) return;
-                                context.read<CommunityBloc>().add(
-                                  ReplySubmitted(
-                                    postId: widget.post.postId,
-                                    authorUserId: user.userId,
-                                    body: text,
-                                    isAnonymous: _replyAnonymous,
-                                  ),
-                                );
-                              },
+                        icon: const Icon(
+                          Icons.send_rounded,
+                          color: AppColors.teal,
+                        ),
+                        onPressed: () {
+                          final text = _replyController.text.trim();
+                          final user = context
+                              .read<AuthBloc>()
+                              .state
+                              .user;
+                          if (text.isEmpty || user == null) return;
+                          context.read<CommunityBloc>().add(
+                            ReplySubmitted(
+                              postId: widget.post.postId,
+                              authorUserId: user.userId,
+                              body: text,
+                              isAnonymous: _replyAnonymous,
                             ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

@@ -40,6 +40,34 @@ class PostSubmitted extends CommunityEvent {
       [authorUserId, body, isAnonymous, pregnancyWeek, photoUrl];
 }
 
+class PostEdited extends CommunityEvent {
+  final String postId;
+  final String authorUserId;
+  final String body;
+
+  const PostEdited({
+    required this.postId,
+    required this.authorUserId,
+    required this.body,
+  });
+
+  @override
+  List<Object?> get props => [postId, authorUserId, body];
+}
+
+class PostDeleted extends CommunityEvent {
+  final String postId;
+  final String authorUserId;
+
+  const PostDeleted({
+    required this.postId,
+    required this.authorUserId,
+  });
+
+  @override
+  List<Object?> get props => [postId, authorUserId];
+}
+
 class ReplySubmitted extends CommunityEvent {
   final String postId;
   final String authorUserId;

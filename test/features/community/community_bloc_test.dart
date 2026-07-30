@@ -9,6 +9,8 @@ import 'package:safemom/features/community/domain/usecases/create_post.dart';
 import 'package:safemom/features/community/domain/usecases/create_reply.dart';
 import 'package:safemom/features/community/domain/usecases/get_available_groups.dart';
 import 'package:safemom/features/community/domain/usecases/get_group_posts.dart';
+import 'package:safemom/features/community/domain/usecases/update_post.dart';
+import 'package:safemom/features/community/domain/usecases/delete_post.dart';
 import 'package:safemom/features/community/presentation/bloc/community_bloc.dart';
 import 'package:safemom/features/community/presentation/bloc/community_event.dart';
 import 'package:safemom/features/community/presentation/bloc/community_state.dart';
@@ -53,6 +55,8 @@ void main() {
       getGroupPosts: GetGroupPosts(repository),
       createPost: CreatePost(repository),
       createReply: CreateReply(repository),
+      updatePost: UpdatePost(repository),
+      deletePost: DeletePost(repository),
     );
   });
 
@@ -63,13 +67,13 @@ void main() {
       'emits group then feed success when both fetches succeed',
       build: () {
         when(
-          () => repository.getAvailableGroups(
+              () => repository.getAvailableGroups(
             pregnancyWeek: any(named: 'pregnancyWeek'),
             locationHint: any(named: 'locationHint'),
           ),
         ).thenAnswer((_) async => [testGroup]);
         when(
-          () => repository.getGroupPosts(
+              () => repository.getGroupPosts(
             groupId: any(named: 'groupId'),
             limit: any(named: 'limit'),
             before: any(named: 'before'),
@@ -81,10 +85,10 @@ void main() {
       expect: () => [
         predicate<CommunityState>((s) => s.groupStatus == GroupStatus.loading),
         predicate<CommunityState>(
-          (s) => s.groupStatus == GroupStatus.success && s.group == testGroup,
+              (s) => s.groupStatus == GroupStatus.success && s.group == testGroup,
         ),
         predicate<CommunityState>(
-          (s) => s.feedStatus == FeedStatus.success && s.posts.length == 1,
+              (s) => s.feedStatus == FeedStatus.success && s.posts.length == 1,
         ),
       ],
     );
@@ -93,7 +97,7 @@ void main() {
       'emits an error state when no groups are available',
       build: () {
         when(
-          () => repository.getAvailableGroups(
+              () => repository.getAvailableGroups(
             pregnancyWeek: any(named: 'pregnancyWeek'),
             locationHint: any(named: 'locationHint'),
           ),
@@ -104,7 +108,7 @@ void main() {
       expect: () => [
         predicate<CommunityState>((s) => s.groupStatus == GroupStatus.loading),
         predicate<CommunityState>(
-          (s) => s.groupStatus == GroupStatus.error && s.groupError != null,
+              (s) => s.groupStatus == GroupStatus.error && s.groupError != null,
         ),
       ],
     );
@@ -115,7 +119,7 @@ void main() {
       'prepends the new post to the feed on success',
       build: () {
         when(
-          () => repository.createPost(
+              () => repository.createPost(
             groupId: any(named: 'groupId'),
             authorUserId: any(named: 'authorUserId'),
             body: any(named: 'body'),
@@ -138,11 +142,11 @@ void main() {
       ),
       expect: () => [
         predicate<CommunityState>(
-          (s) => s.composerStatus == ComposerStatus.submitting,
+              (s) => s.composerStatus == ComposerStatus.submitting,
         ),
         predicate<CommunityState>(
-          (s) =>
-              s.composerStatus == ComposerStatus.success &&
+              (s) =>
+          s.composerStatus == ComposerStatus.success &&
               s.posts.contains(post),
         ),
       ],
@@ -161,9 +165,46 @@ void main() {
       ),
       expect: () => [
         predicate<CommunityState>(
-          (s) =>
-              s.composerStatus == ComposerStatus.error &&
+              (s) =>
+          s.composerStatus == ComposerStatus.error &&
               s.composerError != null,
+        ),
+      ],
+    );
+  });
+
+  group('PostEdited', () {
+    blocTest<CommunityBloc, CommunityState>(
+      'updates the post body in the feed on success',
+      build: () {
+        when(
+              () => repository.updatePost(
+            postId: any(named: 'postId'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer((_) async {});
+        return bloc;
+      },
+      seed: () => CommunityState(
+        groupStatus: GroupStatus.success,
+        group: testGroup,
+        posts: [post],
+      ),
+      act: (bloc) => bloc.add(
+        const PostEdited(
+          postId: 'p1',
+          authorUserId: 'u1',
+          body: 'Hello mamas (edited)',
+        ),
+      ),
+      expect: () => [
+        predicate<CommunityState>(
+              (s) => s.composerStatus == ComposerStatus.submitting,
+        ),
+        predicate<CommunityState>(
+              (s) =>
+          s.composerStatus == ComposerStatus.success &&
+              s.posts.first.body == 'Hello mamas (edited)',
         ),
       ],
     );
@@ -174,14 +215,14 @@ void main() {
       'stores the new reply locally for that post on success',
       build: () {
         when(
-          () => repository.createReply(
+              () => repository.createReply(
             postId: any(named: 'postId'),
             authorUserId: any(named: 'authorUserId'),
             body: any(named: 'body'),
             isAnonymous: any(named: 'isAnonymous'),
           ),
         ).thenAnswer(
-          (_) async => Reply(
+              (_) async => Reply(
             replyId: 'r1',
             postId: 'p1',
             authorUserId: 'u1',
@@ -201,11 +242,11 @@ void main() {
       ),
       expect: () => [
         predicate<CommunityState>(
-          (s) => s.replyStatus == ComposerStatus.submitting,
+              (s) => s.replyStatus == ComposerStatus.submitting,
         ),
         predicate<CommunityState>(
-          (s) =>
-              s.replyStatus == ComposerStatus.success &&
+              (s) =>
+          s.replyStatus == ComposerStatus.success &&
               s.repliesFor('p1').length == 1,
         ),
       ],

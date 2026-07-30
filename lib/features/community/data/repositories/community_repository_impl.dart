@@ -156,6 +156,18 @@ class CommunityRepositoryImpl implements CommunityRepository {
   }
 
   @override
+  Future<void> updatePost({
+    required String postId,
+    required String body,
+  }) async {
+    try {
+      await _datasource.updatePost(postId: postId, body: body);
+    } on FirebaseException catch (e) {
+      throw _translateException(e);
+    }
+  }
+
+  @override
   Future<void> toggleLikePost({
     required String postId,
     required bool liked,

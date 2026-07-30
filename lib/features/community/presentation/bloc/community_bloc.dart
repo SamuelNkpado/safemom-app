@@ -4,8 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/reply.dart';
 import '../../domain/usecases/create_post.dart';
 import '../../domain/usecases/create_reply.dart';
+import '../../domain/usecases/delete_post.dart';
 import '../../domain/usecases/get_available_groups.dart';
 import '../../domain/usecases/get_group_posts.dart';
+import '../../domain/usecases/update_post.dart';
 import 'community_event.dart';
 import 'community_state.dart';
 
@@ -16,19 +18,25 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
   final GetGroupPosts getGroupPosts;
   final CreatePost createPost;
   final CreateReply createReply;
+  final UpdatePost updatePost;
+  final DeletePost deletePost;
 
   CommunityBloc({
     required this.getAvailableGroups,
     required this.getGroupPosts,
     required this.createPost,
     required this.createReply,
+    required this.updatePost,
+    required this.deletePost,
   }) : super(const CommunityState()) {
     on<FeedRequested>(_onFeedRequested);
     on<DefaultAnonymousToggled>(_onDefaultAnonymousToggled);
     on<PostSubmitted>(_onPostSubmitted);
+    on<PostEdited>(_onPostEdited);
+    on<PostDeleted>(_onPostDeleted);
     on<ReplySubmitted>(_onReplySubmitted);
     on<_PreferencesLoaded>(
-      (event, emit) => emit(state.copyWith(defaultAnonymous: event.value)),
+          (event, emit) => emit(state.copyWith(defaultAnonymous: event.value)),
     );
     _loadPreferences();
   }
@@ -40,9 +48,9 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
   }
 
   Future<void> _onFeedRequested(
-    FeedRequested event,
-    Emitter<CommunityState> emit,
-  ) async {
+      FeedRequested event,
+      Emitter<CommunityState> emit,
+      ) async {
     emit(
       state.copyWith(
         groupStatus: GroupStatus.loading,
@@ -88,18 +96,18 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
   }
 
   Future<void> _onDefaultAnonymousToggled(
-    DefaultAnonymousToggled event,
-    Emitter<CommunityState> emit,
-  ) async {
+      DefaultAnonymousToggled event,
+      Emitter<CommunityState> emit,
+      ) async {
     emit(state.copyWith(defaultAnonymous: event.value));
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kDefaultAnonymousPrefKey, event.value);
   }
 
   Future<void> _onPostSubmitted(
-    PostSubmitted event,
-    Emitter<CommunityState> emit,
-  ) async {
+      PostSubmitted event,
+      Emitter<CommunityState> emit,
+      ) async {
     final group = state.group;
     if (group == null) {
       emit(
@@ -142,16 +150,94 @@ class CommunityBloc extends Bloc<CommunityEvent, CommunityState> {
         state.copyWith(
           composerStatus: ComposerStatus.error,
           composerError:
-              'Could not post right now. Check your connection and try again.',
+          'Could not post right now. Check your connection and try again.',
+        ),
+      );
+    }
+  }
+
+  Future<void> _onPostEdited(
+      PostEdited event,
+      Emitter<CommunityState> emit,
+      ) async {
+    emit(state.copyWith(composerStatus: ComposerStatus.submitting));
+    try {
+      await updatePost(
+        postId: event.postId,
+        authorUserId: event.authorUserId,
+        body: event.body,
+      );
+      // Reflect the edit in the in-memory feed immediately.
+      final updatedPosts = state.posts
+          .map((p) => p.postId == event.postId
+          ? p.copyWith(body: event.body.trim())
+          : p)
+          .toList();
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.success,
+          posts: updatedPosts,
+        ),
+      );
+    } on ArgumentError catch (e) {
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.error,
+          composerError: e.message.toString(),
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.error,
+          composerError:
+          'Could not save your edit. Check your connection and try again.',
+        ),
+      );
+    }
+  }
+
+  Future<void> _onPostDeleted(
+      PostDeleted event,
+      Emitter<CommunityState> emit,
+      ) async {
+    emit(state.copyWith(composerStatus: ComposerStatus.submitting));
+    try {
+      await deletePost(
+        postId: event.postId,
+        authorUserId: event.authorUserId,
+      );
+      // Remove the deleted post from the in-memory feed immediately.
+      final updatedPosts =
+      state.posts.where((p) => p.postId != event.postId).toList();
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.success,
+          posts: updatedPosts,
+        ),
+      );
+    } on ArgumentError catch (e) {
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.error,
+          composerError: e.message.toString(),
+        ),
+      );
+    } catch (_) {
+      emit(
+        state.copyWith(
+          composerStatus: ComposerStatus.error,
+          composerError:
+          'Could not delete the post. Check your connection and try again.',
         ),
       );
     }
   }
 
   Future<void> _onReplySubmitted(
-    ReplySubmitted event,
-    Emitter<CommunityState> emit,
-  ) async {
+      ReplySubmitted event,
+      Emitter<CommunityState> emit,
+      ) async {
     emit(state.copyWith(replyStatus: ComposerStatus.submitting));
     try {
       final reply = await createReply(

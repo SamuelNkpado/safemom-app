@@ -37,6 +37,8 @@ import '../../features/community/data/datasources/community_firestore_datasource
 import '../../features/community/data/repositories/community_repository_impl.dart';
 import '../../features/community/domain/repositories/community_repository.dart';
 import '../../features/community/domain/usecases/create_post.dart';
+import '../../features/community/domain/usecases/update_post.dart';
+import '../../features/community/domain/usecases/delete_post.dart';
 import '../../features/community/domain/usecases/create_reply.dart';
 import '../../features/community/domain/usecases/get_available_groups.dart';
 import '../../features/community/domain/usecases/get_group_posts.dart';
@@ -211,6 +213,12 @@ Future<void> configureDependencies() async {
   );
   getIt.registerFactory<CreatePost>(
         () => CreatePost(getIt<CommunityRepository>()),
+  );
+  getIt.registerFactory<UpdatePost>(
+        () => UpdatePost(getIt<CommunityRepository>()),
+  );
+  getIt.registerFactory<DeletePost>(
+        () => DeletePost(getIt<CommunityRepository>()),
   );
   getIt.registerFactory<GetGroupPosts>(
         () => GetGroupPosts(getIt<CommunityRepository>()),

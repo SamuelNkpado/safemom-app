@@ -10,12 +10,16 @@ class PostCard extends StatelessWidget {
   final Post post;
   final bool isOwnPost;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const PostCard({
     super.key,
     required this.post,
     required this.isOwnPost,
     required this.onTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   String get _displayName {
@@ -23,6 +27,8 @@ class PostCard extends StatelessWidget {
     if (isOwnPost) return 'You';
     return 'A member';
   }
+
+  bool get _showMenu => isOwnPost && (onEdit != null || onDelete != null);
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +95,52 @@ class PostCard extends StatelessWidget {
                       'Pending review',
                       style: TextStyle(fontSize: 10),
                     ),
+                  ),
+                if (_showMenu)
+                  PopupMenuButton<String>(
+                    icon: const Icon(
+                      Icons.more_vert_rounded,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        onEdit?.call();
+                      } else if (value == 'delete') {
+                        onDelete?.call();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      if (onEdit != null)
+                        const PopupMenuItem<String>(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit_outlined, size: 18),
+                              SizedBox(width: AppSpacing.sm),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                      if (onDelete != null)
+                        const PopupMenuItem<String>(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete_outline_rounded,
+                                size: 18,
+                                color: AppColors.emergencyRed,
+                              ),
+                              SizedBox(width: AppSpacing.sm),
+                              Text(
+                                'Delete',
+                                style: TextStyle(color: AppColors.emergencyRed),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
                   ),
               ],
             ),
